@@ -155,7 +155,16 @@ if __name__ == '__main__':
                [[0, 0, 0, 0, 1, 0, 0, 0]],
                [[0, 0, 0, 0, 0, 1, 0, 0]],
                [[0, 0, 0, 0, 0, 0, 1, 0]],
-               [[0, 0, 0, 0, 0, 0, 0, 1]]]
+               [[0, 0, 0, 0, 0, 0, 0, 1]],
+##               [[0, 1, 1, 1, 1, 1, 1, 1]],
+##               [[1, 0, 1, 1, 1, 1, 1, 1]],
+##               [[1, 1, 0, 1, 1, 1, 1, 1]],
+##               [[1, 1, 1, 0, 1, 1, 1, 1]],
+##               [[1, 1, 1, 1, 0, 1, 1, 1]],
+##               [[1, 1, 1, 1, 1, 0, 1, 1]],
+##               [[1, 1, 1, 1, 1, 1, 0, 1]],
+##               [[1, 1, 1, 1, 1, 1, 1, 0]]
+               ]
     data = zip(samples, samples)
     mlp.train(data, show_status=True)
 
@@ -168,19 +177,19 @@ if __name__ == '__main__':
     print([1, 0, 0, 0, 1, 1, 0, 1])
     print(test1)
     print(map(round, test1))
-    print()
+    print('')
     print([1, 0, 1, 0, 1, 1, 0, 0])
     print(test2)
-    print(map(round, test1))
-    print()
+    print(map(round, test2))
+    print('')
     print([0, 0, 0, 0, 0, 0, 0, 0])
     print(test3)
-    print(map(round, test1))
-    print()
+    print(map(round, test3))
+    print('')
     print([1, 1, 1, 1, 1, 1, 1, 1])
     print(test4)
-    print(map(round, test1))
-    print()
+    print(map(round, test4))
+    print('')
     
     
     
