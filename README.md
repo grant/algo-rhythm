@@ -41,3 +41,13 @@ timidity sample.mid
 ```
 
 PC - Use Windows Media Player
+
+### Jetson
+
+How to ssh into the jetson:
+
+```sh
+ssh rnnmusic@eeb003e-jetsontx1.cs.washington.edu
+```
+
+Password is on machine.
