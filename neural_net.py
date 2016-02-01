@@ -11,7 +11,7 @@ class Layer:
     Calling compute on a theano matrix (1 x n_inputs) prudces array
     of node outputs.
     """
-    def __init__(self, input_size, output_size, output=False):
+    def __init__(self, input_size, output_size, next_layer=None):
         """
         Initialize the layer.
 
@@ -22,29 +22,48 @@ class Layer:
         self.input_size = input_size
         self.output_size = output_size
         self.generate_random_weights()
-        self.output = output
+        self.errors = theano.shared(numpy.zeros([1, output_size], 'float32'))
+        self.inputs = theano.shared(numpy.zeros([1, input_size], 'float32'))
+        self.outputs = theano.shared(numpy.zeros([1, output_size], 'float32'))
+        self.output = next_layer == None
 
         ####define and compile theano functions for internal use####
-        inp = tensor.fmatrix('inputs')
-        out = tensor.fmatrix('outputs')
-        err = theano.tensor.fmatrix('errors')
-        wei = tensor.fmatrix('weights')
-        eta = theano.tensor.fscalar('eta')
+        exp = tensor.fmatrix('expected')
+        eta = tensor.fscalar('eta')
 
         ##Compute outputs given inputs
-        new_out = tensor.nnet.sigmoid(tensor.dot(inp, wei))
-        self.get_output = theano.function([inp, wei], new_out,
+        self.get_output = theano.function([],
+                                          updates = [(self.outputs,
+                                                        tensor.nnet.sigmoid(
+                                                            tensor.dot(
+                                                               self.inputs,
+                                                               self.weights)))],
                                           name='get_output')
 
         ##Compute error values given errors of previous layer
-        prod = out * (1 - out) * tensor.dot(err, wei.T)
-        self.find_errors = theano.function([err, wei, out], prod,
+        if self.output:
+            self.find_errors = theano.function([exp],
+                                               updates = [(self.errors,
+                                                           self.outputs *
+                                                           (1 - self.outputs)
+                                                           * exp)],
+                                           name='find_errors')
+        else:
+            self.find_errors = theano.function([],
+                                               updates = [(self.errors,
+                                                          self.outputs *
+                                                          (1 - self.outputs) *
+                                             tensor.dot(next_layer.errors,
+                                                        next_layer.weights.T))],
                                            name='find_errors')
 
         ##Compute new weight vector
-        val = wei + theano.tensor.dot(inp.T, (eta * err))
-        self.adjust = theano.function([inp, eta, err, wei], val,
-                                     name='adjustment')
+        self.train = theano.function([eta],
+                                      updates = [(self.weights,
+                                                  self.weights +
+                                            theano.tensor.dot(self.inputs.T,
+                                                        (eta * self.errors)))],
+                                     name='train')
 
         
     def generate_random_weights(self):
@@ -59,36 +78,38 @@ class Layer:
                 -4 * numpy.sqrt(6. / (self.input_size + self.output_size)),
                 4 * numpy.sqrt(6. / (self.input_size + self.output_size))
             ).astype('float32'))
-        self.weights = weightfunc()
+        self.weights = theano.shared(weightfunc())
         
     def compute(self, inputs):
         """
         Pass a set of inputs through the layer's perceptrons, and store
         internally the inputs and outputs for use in training.
         """
-        self.inputs = inputs
-        self.outputs = self.get_output(inputs, self.weights)
-        return self.outputs
+        self.inputs.set_value(inputs)
+        self.get_output()
+        return self.outputs.get_value()
 
-    def get_errors(self, errors, weights=None):
+    def get_errors(self, errors=None):
         """
         Compute the error vector given the weight and error vectors
-        for the next layer. If this is an output layer, simply store
-        and return the given errors.
+        for the next layer. If the layer is an output layer, the function
+        is passed some external computation of error values for the whole
+        network.
         """
         if self.output:
-            self.errors = errors
+            self.find_errors(errors)
         else:
-            self.errors = self.find_errors(errors, weights, self.outputs)
-        return self.errors
+            self.find_errors()
 
-    def train(self, rate):
-        self.weights = self.adjust(self.inputs, rate, self.errors, self.weights)
+
+##class RecurrentLayer(Layer):
+    
+
 
 class MLP:
     '''A simple multi-layered perceprtron'''
     
-    def __init__(self, inputs, layers):
+    def __init__(self, inputs, outputs, layers):
         """
         Initialize the MLP with random weights.
 
@@ -97,15 +118,21 @@ class MLP:
                       number of outputs
         """
         self.layers = []
-        for n in layers:
-            self.layers.append(Layer(inputs, n, n == layers[-1]))
-            inputs = n
+        next_layer = Layer(layers[-1], outputs)
+        self.layers.append(next_layer)
+        outputs = layers[-1]
+        for n in layers[-2::-1]:
+            next_layer = Layer(n, outputs, next_layer)
+            self.layers.append(next_layer)
+            outputs = n
+        self.layers.append(Layer(inputs, outputs, next_layer))
+        self.layers = self.layers[::-1]
 
     def run(self, inputs):
         '''Compute the MLP's output on a given set of inputs'''
         return reduce(lambda i, l: l.compute(i), self.layers, inputs)
 
-    def train(self, data, epochs=5000, rate=2**-8, show_status=False):
+    def train(self, data, epochs=5000, rate=2**-3, show_status=False):
         """
         Train the mlp using backpropegation.
 
@@ -128,7 +155,7 @@ class MLP:
                 weights = self.layers[-1].weights
                 self.layers[-1].train(rate)
                 for layer in self.layers[-2::-1]:
-                    errors = layer.get_errors(errors, weights)
+                    errors = layer.get_errors()
                     weights = layer.weights
                     layer.train(rate)
                 
@@ -137,15 +164,7 @@ if __name__ == '__main__':
     ##Example
     ##initialize MLP with eight inputs, a 3-node hidden layer, and eight outputs
     ##like the binary identity example
-    mlp = MLP(8, [3, 8])
-    
-    ##feed it some arbitrary inputs and print results
-    ##note that training hasn't taken place yet, so weights are all random, and
-    ##these outputs don't mean anything
-    print(map(round, mlp.run([[1, 0, 0, 0, 1, 1, 0, 1]])[0]))
-    print(map(round, mlp.run([[1, 0, 1, 0, 1, 1, 0, 0]])[0]))
-    print(map(round, mlp.run([[0, 0, 0, 0, 0, 0, 0, 0]])[0]))
-    print(map(round, mlp.run([[1, 1, 1, 1, 1, 1, 1, 1]])[0]))
+    mlp = MLP(8, 8, [5])
     
     ##train on example data from book
     samples = [[[1, 0, 0, 0, 0, 0, 0, 0]],
@@ -155,41 +174,16 @@ if __name__ == '__main__':
                [[0, 0, 0, 0, 1, 0, 0, 0]],
                [[0, 0, 0, 0, 0, 1, 0, 0]],
                [[0, 0, 0, 0, 0, 0, 1, 0]],
-               [[0, 0, 0, 0, 0, 0, 0, 1]],
-##               [[0, 1, 1, 1, 1, 1, 1, 1]],
-##               [[1, 0, 1, 1, 1, 1, 1, 1]],
-##               [[1, 1, 0, 1, 1, 1, 1, 1]],
-##               [[1, 1, 1, 0, 1, 1, 1, 1]],
-##               [[1, 1, 1, 1, 0, 1, 1, 1]],
-##               [[1, 1, 1, 1, 1, 0, 1, 1]],
-##               [[1, 1, 1, 1, 1, 1, 0, 1]],
-##               [[1, 1, 1, 1, 1, 1, 1, 0]]
-               ]
+               [[0, 0, 0, 0, 0, 0, 0, 1]]]
     data = zip(samples, samples)
-    mlp.train(data, show_status=True)
+    mlp.train(data, show_status=False, rate=.25)
 
-    ##run same inputs as before
-    test1 = mlp.run([[1, 0, 0, 0, 1, 1, 0, 1]])[0]
-    test2 = mlp.run([[1, 0, 1, 0, 1, 1, 0, 0]])[0]
-    test3 = mlp.run([[0, 0, 0, 0, 0, 0, 0, 0]])[0]
-    test4 = mlp.run([[1, 1, 1, 1, 1, 1, 1, 1]])[0]
-    
-    print([1, 0, 0, 0, 1, 1, 0, 1])
-    print(test1)
-    print(map(round, test1))
-    print('')
-    print([1, 0, 1, 0, 1, 1, 0, 0])
-    print(test2)
-    print(map(round, test2))
-    print('')
-    print([0, 0, 0, 0, 0, 0, 0, 0])
-    print(test3)
-    print(map(round, test3))
-    print('')
-    print([1, 1, 1, 1, 1, 1, 1, 1])
-    print(test4)
-    print(map(round, test4))
-    print('')
-    
-    
+    ##run test inputs
+    for s in samples:
+        test = mlp.run(s)[0]
+        print(s)
+        print(test)
+        print mlp.layers[0].outputs.get_value()
+        print(map(round, test))
+        print('')
     
