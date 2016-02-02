@@ -2,8 +2,6 @@ import theano
 import theano.tensor as tensor
 import numpy
 
-##function to convert python list to matrix
-
 class Layer:
     """
     A single layer of an MLP.
@@ -21,15 +19,18 @@ class Layer:
         """
         self.input_size = input_size
         self.output_size = output_size
+        self.random = tensor.shared_randomstreams.RandomStreams()
         self.generate_random_weights()
         self.errors = theano.shared(numpy.zeros([1, output_size], 'float32'))
         self.inputs = theano.shared(numpy.zeros([1, input_size], 'float32'))
         self.outputs = theano.shared(numpy.zeros([1, output_size], 'float32'))
         self.output = next_layer == None
-
-        ####define and compile theano functions for internal use####
+        self.generate_theano_functions(next_layer)
+        
+    def generate_theano_functions(self, next_layer):
+        '''Compile necessary theano functions'''
         exp = tensor.fmatrix('expected')
-        eta = tensor.fscalar('eta')
+        rate = tensor.fscalar('rate')
 
         ##Compute outputs given inputs
         self.get_output = theano.function([],
@@ -58,12 +59,19 @@ class Layer:
                                            name='find_errors')
 
         ##Compute new weight vector
-        self.train = theano.function([eta],
+        self.train = theano.function([rate],
                                       updates = [(self.weights,
                                                   self.weights +
                                             theano.tensor.dot(self.inputs.T,
-                                                        (eta * self.errors)))],
+                                                        (rate * self.errors)))],
                                      name='train')
+
+        ##Drop a number of nodes roughly equal to rate/output_size
+        self.dropout = theano.function([rate], updates = [(self.outputs,
+                                            tensor.switch(
+                                                self.random.binomial(size=(1,
+                                                    self.output_size),
+                                                    p=rate), self.outputs, 0))])
 
         
     def generate_random_weights(self):
@@ -72,21 +80,24 @@ class Layer:
         an interval described at:
         http://deeplearning.net/tutorial/mlp.html#mlp
         """
-        random = tensor.shared_randomstreams.RandomStreams()
-        weightfunc = theano.function([], random.uniform(
+        weightfunc = theano.function([], self.random.uniform(
                 (self.input_size, self.output_size),
                 -4 * numpy.sqrt(6. / (self.input_size + self.output_size)),
                 4 * numpy.sqrt(6. / (self.input_size + self.output_size))
             ).astype('float32'))
         self.weights = theano.shared(weightfunc())
         
-    def compute(self, inputs):
+    def compute(self, inputs, dropout=0):
         """
         Pass a set of inputs through the layer's perceptrons, and store
         internally the inputs and outputs for use in training.
+
+        param dropout: percentage of nodes to drop
         """
         self.inputs.set_value(inputs)
         self.get_output()
+        if dropout != 0:
+            self.dropout(dropout)
         return self.outputs.get_value()
 
     def get_errors(self, errors=None):
@@ -102,14 +113,87 @@ class Layer:
             self.find_errors()
 
 
-##class RecurrentLayer(Layer):
-    
+class RecurrentLayer(Layer):
+    """
+    A simple LTSM layer of a recurrent neural network.
 
+    A layer takes a certain number of inputs and outputs a certain number of
+    outputs, just like a typical feedforward layer, but the most recent outputs
+    are stored and used in addition to new inputs when calculating subsequent
+    outputs.
+
+    A RecurrentLayer cannot currently be chained with a normal Layer.
+    """
+    
+    def __init__(self, input_size, output_size, next_layer=None):
+        Layer.__init__(self, input_size, output_size, next_layer)
+
+    def generate_theano_functions(self, next_layer):
+        exp = tensor.fmatrix('expected')
+        rate = tensor.fscalar('rate') 
+        self.combined_inputs = tensor.concatenate([self.inputs, self.outputs],
+                                                  1)
+                                             
+        ##Compute outputs given inputs
+        self.get_output = theano.function([],
+                                        updates = [(self.outputs,
+                                                tensor.nnet.sigmoid(
+                                                    tensor.dot(
+                                                        self.combined_inputs,
+                                                        self.weights)))],
+                                          name='get_output')
+
+
+        ##Compute error values given errors of previous layer
+        if self.output:
+            self.find_errors = theano.function([exp],
+                                               updates = [(self.errors,
+                                                           self.outputs *
+                                                           (1 - self.outputs)
+                                                           * exp)],
+                                           name='find_errors')
+        else:
+            self.find_errors = theano.function([],
+                updates = [(self.errors,
+                            self.outputs * (1 - self.outputs) *
+                            tensor.dot(next_layer.errors,
+                                    next_layer.weights[:self.output_size].T))],
+                            name='find_errors')
+
+        ##Compute new weight vector
+        self.train = theano.function([rate],
+                    updates = [(self.weights,
+                                self.weights +
+                                    theano.tensor.dot(self.combined_inputs.T,
+                                                (rate * self.errors)))],
+                                     name='train')
+
+        ##Drop a number of nodes roughly equal to rate/output_size
+        self.dropout = theano.function([rate], updates = [(self.outputs,
+                                            tensor.switch(
+                                                self.random.binomial(size=(1,
+                                                    self.output_size),
+                                                    p=rate), self.outputs, 0))])
+        
+
+    def generate_random_weights(self):
+        """
+        Generates a random set of weights by uniformly distributing on
+        an interval described at:
+        http://deeplearning.net/tutorial/mlp.html#mlp
+        """
+        weightfunc = theano.function([], self.random.uniform(
+                (self.input_size + self.output_size, self.output_size),
+                -4 * numpy.sqrt(6. / (self.input_size + self.output_size * 2)),
+                4 * numpy.sqrt(6. / (self.input_size + self.output_size * 2))
+            ).astype('float32'))
+        self.weights = theano.shared(weightfunc())
+                                          
 
 class MLP:
     '''A simple multi-layered perceprtron'''
     
-    def __init__(self, inputs, outputs, layers):
+    def __init__(self, inputs, outputs, layers, recurrent=False):
         """
         Initialize the MLP with random weights.
 
@@ -117,22 +201,35 @@ class MLP:
         param layers: list of layer sizes (in nodes), final value is
                       number of outputs
         """
-        self.layers = []
-        next_layer = Layer(layers[-1], outputs)
-        self.layers.append(next_layer)
-        outputs = layers[-1]
-        for n in layers[-2::-1]:
-            next_layer = Layer(n, outputs, next_layer)
+        if recurrent:
+            self.layers = []
+            next_layer = RecurrentLayer(layers[-1], outputs)
             self.layers.append(next_layer)
-            outputs = n
-        self.layers.append(Layer(inputs, outputs, next_layer))
-        self.layers = self.layers[::-1]
+            outputs = layers[-1]
+            for n in layers[-2::-1]:
+                next_layer = RecurrentLayer(n, outputs, next_layer)
+                self.layers.append(next_layer)
+                outputs = n
+            self.layers.append(RecurrentLayer(inputs, outputs, next_layer))
+            self.layers = self.layers[::-1]
+        else:
+            self.layers = []
+            next_layer = Layer(layers[-1], outputs)
+            self.layers.append(next_layer)
+            outputs = layers[-1]
+            for n in layers[-2::-1]:
+                next_layer = Layer(n, outputs, next_layer)
+                self.layers.append(next_layer)
+                outputs = n
+            self.layers.append(Layer(inputs, outputs, next_layer))
+            self.layers = self.layers[::-1]
 
-    def run(self, inputs):
+    def run(self, inputs, dropout=0):
         '''Compute the MLP's output on a given set of inputs'''
-        return reduce(lambda i, l: l.compute(i), self.layers, inputs)
+        return reduce(lambda i, l: l.compute(i, dropout), self.layers, inputs)
 
-    def train(self, data, epochs=5000, rate=2**-3, show_status=False):
+    def train(self, data, epochs=5000, rate=2**-3, show_status=False,
+              dropout=0):
         """
         Train the mlp using backpropegation.
 
@@ -150,21 +247,20 @@ class MLP:
             if show_status:
                 print("\tEpoch {0} of {1}".format(i, epochs))
             for x, t in data:
-                self.run(x)
-                errors = self.layers[-1].get_errors(sub(t, self.run(x)))
-                weights = self.layers[-1].weights
+                self.layers[-1].get_errors(sub(t,
+                                                        self.run(x,dropout)))
                 self.layers[-1].train(rate)
                 for layer in self.layers[-2::-1]:
-                    errors = layer.get_errors()
-                    weights = layer.weights
+                    layer.get_errors()
                     layer.train(rate)
                 
+
 
 if __name__ == '__main__':
     ##Example
     ##initialize MLP with eight inputs, a 3-node hidden layer, and eight outputs
     ##like the binary identity example
-    mlp = MLP(8, 8, [5])
+    mlp = MLP(8, 8, [4], recurrent=True)
     
     ##train on example data from book
     samples = [[[1, 0, 0, 0, 0, 0, 0, 0]],
@@ -176,7 +272,7 @@ if __name__ == '__main__':
                [[0, 0, 0, 0, 0, 0, 1, 0]],
                [[0, 0, 0, 0, 0, 0, 0, 1]]]
     data = zip(samples, samples)
-    mlp.train(data, show_status=False, rate=.25)
+    mlp.train(data, show_status=True, rate=.25)
 
     ##run test inputs
     for s in samples:
@@ -186,4 +282,5 @@ if __name__ == '__main__':
         print mlp.layers[0].outputs.get_value()
         print(map(round, test))
         print('')
+
     
