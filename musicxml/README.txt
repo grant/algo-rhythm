@@ -1,4 +1,4 @@
-This file contains code and datafiles for getting a training set from Music XML.
+This directory contains code and datafiles for getting a training set from Music XML.
 
 The file "readxml.py" is the main code file.  If the function "createStateMatrices()" is called, then a hash map will be returned, the keys will be
 the xml filenames of the pieces, the values will be python ordered pairs, where the first element is and integer, and the second is a state matrix.
