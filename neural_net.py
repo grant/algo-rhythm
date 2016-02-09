@@ -31,6 +31,7 @@ class Layer:
         '''Compile necessary theano functions'''
         exp = tensor.fmatrix('expected')
         rate = tensor.fscalar('rate')
+        momentum = tensor.fscalar('momentum')
 
         ##Compute outputs given inputs
         self.get_output = theano.function([],
@@ -48,7 +49,8 @@ class Layer:
                                                            self.outputs *
                                                            (1 - self.outputs)
                                                            * exp)],
-                                           name='find_errors')
+                                               name='find_errors',
+                                               allow_input_downcast=True)
         else:
             self.find_errors = theano.function([],
                                                updates = [(self.errors,
@@ -58,20 +60,31 @@ class Layer:
                                                         next_layer.weights.T))],
                                            name='find_errors')
 
-        ##Compute new weight vector
-        self.train = theano.function([rate],
-                                      updates = [(self.weights,
-                                                  self.weights +
+        ##Compute the change to the weight vector using stochastic gradient
+        ##descent with momentum
+        self.train_compute = theano.function([rate, momentum],
+                                      updates = [(self.delta_weights,
+                                                  self.delta_weights *
+                                                  momentum +
                                             theano.tensor.dot(self.inputs.T,
                                                         (rate * self.errors)))],
-                                     name='train')
+                                     name='train_compute',
+                                     allow_input_downcast=True)
+
+        ##Adjust weights using the delta_w computed in train_compute
+        self.adjust = theano.function([], updates=[(self.weights, self.weights +
+                                                    self.delta_weights)],
+                                      name='adjust')
 
         ##Drop a number of nodes roughly equal to rate/output_size
         self.dropout = theano.function([rate], updates = [(self.outputs,
                                             tensor.switch(
                                                 self.random.binomial(size=(1,
                                                     self.output_size),
-                                                    p=rate), self.outputs, 0))])
+                                                    p=rate), self.outputs /
+                                                             rate, 0))],
+                                       name='dropout',
+                                       allow_input_downcast=True)
 
         
     def generate_random_weights(self):
@@ -86,6 +99,9 @@ class Layer:
                 4 * numpy.sqrt(6. / (self.input_size + self.output_size))
             ).astype('float32'))
         self.weights = theano.shared(weightfunc())
+        self.delta_weights = theano.shared(numpy.zeros([self.input_size,
+                                                         self.output_size],
+                                                        'float32'))
         
     def compute(self, inputs, dropout=0):
         """
@@ -99,6 +115,10 @@ class Layer:
         if dropout != 0:
             self.dropout(dropout)
         return self.outputs.get_value()
+
+    def train(self, rate, momentum):
+        self.train_compute(rate, momentum)
+        self.adjust()
 
     def get_errors(self, errors=None):
         """
@@ -130,15 +150,16 @@ class RecurrentLayer(Layer):
 
     def generate_theano_functions(self, next_layer):
         exp = tensor.fmatrix('expected')
-        rate = tensor.fscalar('rate') 
+        rate = tensor.fscalar('rate')
+        momentum = tensor.fscalar('momentum')
         self.combined_inputs = tensor.concatenate([self.inputs, self.outputs],
                                                   1)
                                              
         ##Compute outputs given inputs
         self.get_output = theano.function([],
                                         updates = [(self.outputs,
-                                                tensor.nnet.sigmoid(
-                                                    tensor.dot(
+                                                    tensor.nnet.sigmoid(
+                                                      tensor.dot(
                                                         self.combined_inputs,
                                                         self.weights)))],
                                           name='get_output')
@@ -151,7 +172,8 @@ class RecurrentLayer(Layer):
                                                            self.outputs *
                                                            (1 - self.outputs)
                                                            * exp)],
-                                           name='find_errors')
+                                               name='find_errors',
+                                               allow_input_downcast=True)
         else:
             self.find_errors = theano.function([],
                 updates = [(self.errors,
@@ -160,20 +182,30 @@ class RecurrentLayer(Layer):
                                     next_layer.weights[:self.output_size].T))],
                             name='find_errors')
 
-        ##Compute new weight vector
-        self.train = theano.function([rate],
-                    updates = [(self.weights,
-                                self.weights +
+        ##Compute the change to the weight vector using stochastic gradient
+        ##descent with momentum
+        self.train_compute = theano.function([rate, momentum],
+                    updates = [(self.delta_weights,
+                                self.delta_weights * momentum +
                                     theano.tensor.dot(self.combined_inputs.T,
                                                 (rate * self.errors)))],
-                                     name='train')
+                                     name='train_compute',
+                                     allow_input_downcast=True)
+
+        ##Adjust weights using the delta_w computed in train_compute
+        self.adjust = theano.function([], updates=[(self.weights, self.weights +
+                                                    self.delta_weights)],
+                                      name='adjust')
 
         ##Drop a number of nodes roughly equal to rate/output_size
         self.dropout = theano.function([rate], updates = [(self.outputs,
                                             tensor.switch(
                                                 self.random.binomial(size=(1,
                                                     self.output_size),
-                                                    p=rate), self.outputs, 0))])
+                                                    p=rate), self.outputs /
+                                                             rate, 0))],
+                                       name='dropout',
+                                       allow_input_downcast=True)
         
 
     def generate_random_weights(self):
@@ -188,6 +220,10 @@ class RecurrentLayer(Layer):
                 4 * numpy.sqrt(6. / (self.input_size + self.output_size * 2))
             ).astype('float32'))
         self.weights = theano.shared(weightfunc())
+        self.delta_weights = theano.shared(numpy.zeros([self.input_size +
+                                                         self.output_size,
+                                                         self.output_size],
+                                                        'float32'))
                                           
 
 class MLP:
@@ -228,8 +264,8 @@ class MLP:
         '''Compute the MLP's output on a given set of inputs'''
         return reduce(lambda i, l: l.compute(i, dropout), self.layers, inputs)
 
-    def train(self, data, epochs=5000, rate=2**-3, show_status=False,
-              dropout=0):
+    def train(self, data, epochs=5000, rate=2**-3, dropout=0, momentum=0,
+              show_status=False):
         """
         Train the mlp using backpropegation.
 
@@ -247,12 +283,11 @@ class MLP:
             if show_status:
                 print("\tEpoch {0} of {1}".format(i, epochs))
             for x, t in data:
-                self.layers[-1].get_errors(sub(t,
-                                                        self.run(x,dropout)))
-                self.layers[-1].train(rate)
+                self.layers[-1].get_errors(sub(t, self.run(x,dropout)))
+                self.layers[-1].train(rate, momentum)
                 for layer in self.layers[-2::-1]:
                     layer.get_errors()
-                    layer.train(rate)
+                    layer.train(rate, momentum)
                 
 
 
@@ -263,6 +298,14 @@ if __name__ == '__main__':
     mlp = MLP(8, 8, [4], recurrent=True)
     
     ##train on example data from book
+##    samples = [[[.5, -.5, -.5, -.5, -.5, -.5, -.5, -.5]],
+##               [[-.5, .5, -.5, -.5, -.5, -.5, -.5, -.5]],
+##               [[-.5, -.5, .5, -.5, -.5, -.5, -.5, -.5]],
+##               [[-.5, -.5, -.5, .5, -.5, -.5, -.5, -.5]],
+##               [[-.5, -.5, -.5, -.5, .5, -.5, -.5, -.5]],
+##               [[-.5, -.5, -.5, -.5, -.5, .5, -.5, -.5]],
+##               [[-.5, -.5, -.5, -.5, -.5, -.5, .5, -.5]],
+##               [[-.5, -.5, -.5, -.5, -.5, -.5, -.5, .5]]]
     samples = [[[1, 0, 0, 0, 0, 0, 0, 0]],
                [[0, 1, 0, 0, 0, 0, 0, 0]],
                [[0, 0, 1, 0, 0, 0, 0, 0]],
@@ -272,7 +315,7 @@ if __name__ == '__main__':
                [[0, 0, 0, 0, 0, 0, 1, 0]],
                [[0, 0, 0, 0, 0, 0, 0, 1]]]
     data = zip(samples, samples)
-    mlp.train(data, show_status=True, rate=.25)
+    mlp.train(data, show_status=True)
 
     ##run test inputs
     for s in samples:
@@ -280,7 +323,6 @@ if __name__ == '__main__':
         print(s)
         print(test)
         print mlp.layers[0].outputs.get_value()
-        print(map(round, test))
         print('')
 
     
