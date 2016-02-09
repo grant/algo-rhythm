@@ -1,3 +1,13 @@
+# Custom ignore
+musicxml/midi
+
+
+
+
+
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
