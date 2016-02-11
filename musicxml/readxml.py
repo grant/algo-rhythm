@@ -2,7 +2,6 @@ import xml.etree.ElementTree
 import fractions
 
 import collections
-import os
 from collections import defaultdict
 
 import midi_to_statematrix
@@ -49,7 +48,7 @@ def getRestLength(note):
       isRest = True
     elif el.tag == 'duration':
       if duration == None:
-        duration = int(el.text)
+        duration = int(el.text)        
       else:
         #found duration tag twice
         print "Duration tag found twice for note..."
@@ -69,7 +68,7 @@ def getBackupLength(backup):
   for el in backup:
     if el.tag == 'duration':
       if duration == None:
-        duration = int(el.text)
+        duration = int(el.text)        
       else:
         #found duration tag twice
         print "Duration tag found twice for note..."
@@ -407,7 +406,7 @@ def createStateMatrices():
 
 def midiForXML(xmlFile, midiDestFile):
   #parse xml file into document tree
-  tree = xml.etree.ElementTree.parse(mxlfile).getroot()
+  tree = xml.etree.ElementTree.parse(xmlFile).getroot()
   tempo = getTempoForSong(tree)
   if tempo == None:
     tempo = 120
@@ -417,7 +416,10 @@ def midiForXML(xmlFile, midiDestFile):
 if __name__ == "__main__":
   stateMatrices = createStateMatrices()
   print "{0} songs total.".format(len(stateMatrices))
-  if not os.path.exists('./midi/'):
-    os.makedirs('./midi/')
   for k in stateMatrices.keys():
     midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1], name=("./midi/" + k))
+
+
+
+
+
