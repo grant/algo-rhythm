@@ -1,6 +1,5 @@
-import theano
+import theano, numpy, os
 import theano.tensor as tensor
-import numpy
 
 class Layer:
     """
@@ -69,7 +68,7 @@ class Layer:
                                             theano.tensor.dot(self.inputs.T,
                                                         (rate * self.errors)))],
                                      name='train_compute',
-                                     allow_input_downcast=True)
+                                     allow_input_downcast=True)
 
         ##Adjust weights using the delta_w computed in train_compute
         self.adjust = theano.function([], updates=[(self.weights, self.weights +
@@ -237,6 +236,7 @@ class MLP:
         param layers: list of layer sizes (in nodes), final value is
                       number of outputs
         """
+        self.recurrent = recurrent
         if recurrent:
             self.layers = []
             next_layer = RecurrentLayer(layers[-1], outputs)
@@ -288,8 +288,45 @@ class MLP:
                 for layer in self.layers[-2::-1]:
                     layer.get_errors()
                     layer.train(rate, momentum)
-                
 
+    def save(self, path):
+        """
+        Save the weights of a network to a folder of npy files
+        'RNN' is appended to the path if network is recurrent, but internal
+        state is not preserved.
+        """
+        path = path + 'RNN/' if self.recurrent else path + '/'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        for i in range(len(self.layers)):
+            numpy.save(path + str(i),
+                        self.layers[i].weights.get_value())
+        
+def load_MLP(path):
+    """
+    Loads an MLP from a previously saved folder.
+    """
+    layers = []
+    i = 0
+    while os.path.exists(path + '/' + str(i) + '.npy'):
+        layers.append(numpy.load(path + '/' + str(i) + '.npy'))
+        i+=1
+    inputs = layers[0].shape[0]
+    recurrent = False
+    if path[-3:] == 'RNN':
+        recurrent = True
+        inputs -= layers[0].shape[1]
+    outputs = layers[0].shape[1]
+    sizes = []
+    for l in layers[1:]:
+        sizes.append(outputs)
+        outputs = l.shape[1]
+    mlp = MLP(inputs, outputs, sizes, recurrent)
+    for l, w in zip(mlp.layers, layers):
+        l.weights.set_value(w)
+    return mlp
+        
+        
 
 if __name__ == '__main__':
     ##Example
@@ -315,7 +352,7 @@ if __name__ == '__main__':
                [[0, 0, 0, 0, 0, 0, 1, 0]],
                [[0, 0, 0, 0, 0, 0, 0, 1]]]
     data = zip(samples, samples)
-    mlp.train(data, show_status=True)
+    mlp.train(data, epochs=200, show_status=True)
 
     ##run test inputs
     for s in samples:
@@ -324,5 +361,7 @@ if __name__ == '__main__':
         print(test)
         print mlp.layers[0].outputs.get_value()
         print('')
-
-    
+    mlp.save('testsave')
+    mlp2 = load_MLP('testsaveRNN')
+    print(mlp.layers[0].weights.get_value())
+    print(mlp2.layers[0].weights.get_value())
