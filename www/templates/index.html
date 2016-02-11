@@ -9,6 +9,19 @@
   <h1>Music</h1>
   <a href="#" onClick="MIDIjs.play('static/bethlehem_du_kleine_stadt.xml.mid');">Play</a>
   <a href="#" onClick="MIDIjs.stop();">Stop</a>
+  <br>
+  <h1>Uploaded files</h1>
+  {% for file in files %}
+    <li><a href="{{ file.url }}">{{ file.name }}</a></li>
+  {% endfor %}
+  <br>
+  <h1>Upload MusicXML</h1>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="Upload">
+  </form>
+
+  <!-- Scripts -->
   <script type="text/javascript" src="static/midi.js"></script>
 </body>
 </html>
