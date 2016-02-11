@@ -1,6 +1,6 @@
 # Custom ignore
 musicxml/midi
-
+.DS_Store
 
 
 
