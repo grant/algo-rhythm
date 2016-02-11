@@ -199,8 +199,7 @@ def iterateThroughMusic(e, handleNote, resolution = 1):
           timePos = latestTime
 
 def createStateMatrices():
-
-  f = open('catalog.txt', "r")
+  f = open('musicxml/catalog.txt', "r")
   lines = f.readlines()
   f.close()
 
@@ -235,7 +234,7 @@ def createStateMatrices():
       pass
     else:
       continue
-    mxlfile = toks[1]
+    mxlfile = 'musicxml/' + toks[1]
     print mxlfile
 
     transpositions = {}
@@ -396,7 +395,8 @@ def createStateMatrices():
 if __name__ == "__main__":
   stateMatrices = createStateMatrices()
   print "{0} songs total.".format(len(stateMatrices))
-  if not os.path.exists('./midi/'):
-    os.makedirs('./midi/')
+  if not os.path.exists('musicxml/midi/'):
+    os.makedirs('musicxml/midi/')
   for k in stateMatrices.keys():
-    midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1], name=("./midi/" + k))
+    midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1],
+                                              name=("musicxml/midi/" + k.split('/')[1]))

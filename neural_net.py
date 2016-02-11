@@ -1,5 +1,6 @@
 import theano, numpy, os
 import theano.tensor as tensor
+import readxml
 
 class Layer:
     """
