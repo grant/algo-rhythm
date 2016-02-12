@@ -374,8 +374,8 @@ def train_statematrix_net(net, batch_size=100, dropout=.5, output_rate = 100,
         for j in xrange(output_rate):
             print('\t\t' + str(i + j))
             for batch in batches:
-                net.reset()
                 net.train(batch, 1, .1, dropout, .5)
+                net.reset()
                 
 def estimate_statematrix_from_output(output):
     """Given output from the neural net, construct a statematrix"""
