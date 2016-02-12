@@ -1,8 +1,7 @@
 import xml.etree.ElementTree
 import fractions
-
-import collections
 import os
+import collections
 from collections import defaultdict
 
 import midi_to_statematrix
@@ -49,7 +48,7 @@ def getRestLength(note):
       isRest = True
     elif el.tag == 'duration':
       if duration == None:
-        duration = int(el.text)
+        duration = int(el.text)        
       else:
         #found duration tag twice
         print "Duration tag found twice for note..."
@@ -69,7 +68,7 @@ def getBackupLength(backup):
   for el in backup:
     if el.tag == 'duration':
       if duration == None:
-        duration = int(el.text)
+        duration = int(el.text)        
       else:
         #found duration tag twice
         print "Duration tag found twice for note..."
@@ -198,6 +197,137 @@ def iterateThroughMusic(e, handleNote, resolution = 1):
               latestTime = timePos
           timePos = latestTime
 
+#parse XML to find the tempo.  Note that for some songs,
+#no tempo will exists, in which case return None.  Also,
+#for some songs, there will be multiple tempos, in which
+#case probably just return the first one found.
+def getTempoForSong(tree):
+  for el in tree:
+    if el.tag == 'sound':
+      if 'tempo' in el.attrib.keys():
+        return int(round(float(el.attrib['tempo'])))
+    else:
+      res = getTempoForSong(el)
+      if res != None:
+        return res
+  return None
+
+
+def stateMatrixForSong(tree, startTime, speed = None, slow = None, transpositions = {}):
+
+  secondsPerSlice = 0.125
+  beatsPerMinute = 120
+
+  #basically we would like to know divisions per slice...
+
+  #e = xml.etree.ElementTree.parse(xmlfile).getroot()
+  e = tree
+
+  divisions = getDivisions(e)
+  #print divisions
+  tripleMeter = False
+  for k in divisions.keys():
+    if divisions[k] % 3 == 0:
+      #Turn this off
+      #print "Triple meter detected"
+      tripleMeter = True
+
+  divisionsMax = None
+  for k in divisions.keys():
+    if divisionsMax == None:
+      divisionsMax = divisions[k]
+    elif divisionsMax < divisions[k]:
+      divisionsMax = divisions[k]
+
+  #check that the min divisions value divides every
+  #key in the map
+  for k in divisions.keys():
+    if divisionsMax % divisions[k] != 0:
+      print "min division ({1}) not divisible by division found ({0})!".format(divisions[k], divisionsMax)
+
+
+  class handleNote_interval_visitor:
+
+    def __init__(self):
+      self.minTimeInterval = None
+
+    def __call__(self, time, pitch, duration, part):
+      if time != 0:
+        if self.minTimeInterval == None:
+          self.minTimeInterval = time
+        else:
+          self.minTimeInterval = fractions.gcd(self.minTimeInterval, time)
+      if duration != 0:
+        if self.minTimeInterval == None:
+          self.minTimeInterval = duration
+        else:
+          self.minTimeInterval = fractions.gcd(self.minTimeInterval, duration)
+
+  visitor = handleNote_interval_visitor()
+  iterateThroughMusic(e, visitor)
+  minTimeInterval = visitor.minTimeInterval
+
+  stateMatrix = []
+
+  def handleNote_createStateMatrix(time, pitch, duration, part):
+    #if part == 'P2':
+      #print "Got note, pitch: {0}, duration: {1}, time: {2}".format(pitch, duration, time)
+    pitch -= lowerBound
+    if part in transpositions.keys():
+      pitch += transpositions[part]
+
+    #Sometimes different parts have different
+    #numbers of divisions, so we have to scale
+    #appropriately
+    if divisions[part] != divisionsMax:
+      slowFactor = (divisionsMax / divisions[part])
+      time *= slowFactor
+      duration *= slowFactor
+
+    if slow != None:
+      time *= slow
+      duration *= slow
+    if speed != None:
+      #skip a note if its granularity
+      #is too fine
+      if time % speed != 0:
+        return
+      time /= speed
+      duration /= speed
+      if duration == 0:
+        duration = 1
+
+    #if necessary, extend state matrix so
+    #that the desired times exists
+    #last time needed is time + duration - 1,
+    #len <= last time needed, so...
+    #print "Note at time {0}, pitch: {1}".format(time, pitch)
+    while len(stateMatrix) < time + duration:
+      row = numPitches * [[0, 0]]
+      stateMatrix.append(row)
+    stateMatrix[time][pitch] = [1, 1]
+    for i in range(time + 1, time + duration):
+      if stateMatrix[i][pitch] == [0, 0]:
+        stateMatrix[i][pitch] = [1, 0]
+
+    #ad hoc--if divisions are divisible by 3, then assume
+    #that the division is at the lowest level for the piece,
+    #we set the granularity to ignore this subdivision level
+
+  minTimeInterval = 1
+  for k in divisions.keys():
+    if divisions[k] % 3 == 0:
+      minTimeInterval = 3
+
+  iterateThroughMusic(e, handleNote_createStateMatrix, minTimeInterval)
+
+  if slow == None:
+    slow = 1
+  if speed == None:
+    speed = 1
+  return (int(round(startTime*divisionsMax*slow/speed)), stateMatrix)
+
+
 def createStateMatrices():
   f = open('musicxml/catalog.txt', "r")
   lines = f.readlines()
@@ -262,135 +392,25 @@ def createStateMatrices():
           continue
         startTime = float(toks[1])
 
-    e = xml.etree.ElementTree.parse(mxlfile).getroot()
-
-    divisions = getDivisions(e)
-    #print divisions
-    tripleMeter = False
-    for k in divisions.keys():
-      if divisions[k] % 3 == 0:
-        #Turn this off
-        #print "Triple meter detected"
-        tripleMeter = True
-
-    divisionsMax = None
-    for k in divisions.keys():
-      if divisionsMax == None:
-        divisionsMax = divisions[k]
-      elif divisionsMax < divisions[k]:
-        divisionsMax = divisions[k]
-
-    #check that the min divisions value divides every
-    #key in the map
-    for k in divisions.keys():
-      if divisionsMax % divisions[k] != 0:
-        print "min division ({1}) not divisible by division found ({0})!".format(divisions[k], divisionsMax)
-
-
-#    minTimeInterval = None
-
-#    def handleNote_interval(time, pitch, duration, part):
-#      nonlocal minTimeInterval
-#      if time != 0:
-#        if minTimeInterval == None:
-#          minTimeInterval = time
-#        else:
-#          minTimeInterval = fractions.gcd(minTimeInterval, time)
-#      if duration != 0:
-#        if minTimeInterval == None:
-#          minTimeInterval = duration
-#        else:
-#          minTimeInterval = fractions.gcd(minTimeInterval, duration)
-
-    class handleNote_interval_visitor:
-
-      def __init__(self):
-        self.minTimeInterval = None
-
-      def __call__(self, time, pitch, duration, part):
-        if time != 0:
-          if self.minTimeInterval == None:
-            self.minTimeInterval = time
-          else:
-            self.minTimeInterval = fractions.gcd(self.minTimeInterval, time)
-        if duration != 0:
-          if self.minTimeInterval == None:
-            self.minTimeInterval = duration
-          else:
-            self.minTimeInterval = fractions.gcd(self.minTimeInterval, duration)
-
-    visitor = handleNote_interval_visitor()
-    iterateThroughMusic(e, visitor)
-    minTimeInterval = visitor.minTimeInterval
-
-    stateMatrix = []
-
-    def handleNote_createStateMatrix(time, pitch, duration, part):
-      #if part == 'P2':
-        #print "Got note, pitch: {0}, duration: {1}, time: {2}".format(pitch, duration, time)
-      pitch -= lowerBound
-      if part in transpositions.keys():
-        pitch += transpositions[part]
-
-      #Sometimes different parts have different
-      #numbers of divisions, so we have to scale
-      #appropriately
-      if divisions[part] != divisionsMax:
-        slowFactor = (divisionsMax / divisions[part])
-        time *= slowFactor
-        duration *= slowFactor
-
-      if slow != None:
-        time *= slow
-        duration *= slow
-      if speed != None:
-        #skip a note if its granularity
-        #is too fine
-        if time % speed != 0:
-          return
-        time /= speed
-        duration /= speed
-        if duration == 0:
-          duration = 1
-
-      #if necessary, extend state matrix so
-      #that the desired times exists
-      #last time needed is time + duration - 1,
-      #len <= last time needed, so...
-      #print "Note at time {0}, pitch: {1}".format(time, pitch)
-      while len(stateMatrix) < time + duration:
-        row = numPitches * [[0, 0]]
-        stateMatrix.append(row)
-  #    print "Time: ", time
-  #    print "Len: ", len(stateMatrix)
-      stateMatrix[time][pitch] = [1, 1]
-      for i in range(time + 1, time + duration):
-        if stateMatrix[i][pitch] == [0, 0]:
-          stateMatrix[i][pitch] = [1, 0]
-  #    stateMatrix[time + duration - 1][pitch] = [1, 1]
-
-    #ad hoc--if divisions are divisible by 3, then assume
-    #that the division is at the lowest level for the piece,
-    #we set the granularity to ignore this subdivision level
-
-    minTimeInterval = 1
-    for k in divisions.keys():
-      if divisions[k] % 3 == 0:
-        minTimeInterval = 3
-
-  #  if speed != None:
-  #    time /= slow
-  #    duration /= slow
-
-    iterateThroughMusic(e, handleNote_createStateMatrix, minTimeInterval)
-
-    if slow == None:
-      slow = 1
-    if speed == None:
-      speed = 1
-    stateMatrices[mxlfile] = (int(round(startTime*divisionsMax*slow/speed)), stateMatrix)
+    #parse xml file into document tree
+    tree = xml.etree.ElementTree.parse(mxlfile).getroot()
+    tempo = getTempoForSong(tree)
+    if tempo == None:
+      print "No tempo found"
+    else:
+      print "Tempo of {0} found".format(tempo)
+    stateMatrices[mxlfile] = stateMatrixForSong(tree, startTime, speed, slow, transpositions)
 
   return stateMatrices
+
+def midiForXML(xmlFile, midiDestFile):
+  #parse xml file into document tree
+  tree = xml.etree.ElementTree.parse(xmlFile).getroot()
+  tempo = getTempoForSong(tree)
+  if tempo == None:
+    tempo = 120
+  stateMatrix = stateMatrixForSong(tree, 0)[1]
+  midi_to_statematrix.noteStateMatrixToMidi(stateMatrix, name=midiDestFile)
 
 if __name__ == "__main__":
   stateMatrices = createStateMatrices()
@@ -399,4 +419,5 @@ if __name__ == "__main__":
     os.makedirs('musicxml/midi/')
   for k in stateMatrices.keys():
     midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1],
-                                              name=("musicxml/midi/" + k.split('/')[1]))
+                                              name=("musicxml/midi/" +
+											  k.split('/')[1]))
