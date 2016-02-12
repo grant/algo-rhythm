@@ -226,7 +226,10 @@ class RecurrentLayer(Layer):
                                                         'float32'))
         
     def reset(self):
-        self.outputs.set_value()
+        """
+        Resets the stored output values to zeroes.
+        """
+        self.outputs.set_value(numpy.zeros([1, self.output_size], 'float32'))
                                           
 
 class MLP:
@@ -335,7 +338,7 @@ def load_MLP(path):
         l.weights.set_value(w)
     return mlp
         
-def train_statematrix_net(net, batch_size=100, dropout=.5, output_rate = 200,
+def train_statematrix_net(net, batch_size=100, dropout=.5, output_rate = 100,
                           output_length=100, total_epochs=5000,
                           path = 'net_output/'):
     """
