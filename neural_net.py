@@ -1,6 +1,6 @@
 import theano, numpy, os
 import theano.tensor as tensor
-import readxml
+import readxml, midi_to_statematrix
 
 class Layer:
     """
@@ -224,6 +224,9 @@ class RecurrentLayer(Layer):
                                                          self.output_size,
                                                          self.output_size],
                                                         'float32'))
+        
+    def reset(self):
+        self.outputs.set_value()
                                           
 
 class MLP:
@@ -302,6 +305,11 @@ class MLP:
         for i in range(len(self.layers)):
             numpy.save(path + str(i),
                         self.layers[i].weights.get_value())
+
+    def reset(self):
+        if self.recurrent:
+            for l in self.layers:
+                l.reset()
         
 def load_MLP(path):
     """
@@ -327,9 +335,57 @@ def load_MLP(path):
         l.weights.set_value(w)
     return mlp
         
-        
+def train_statematrix_net(net, batch_size=100, dropout=.5, output_rate = 200,
+                          output_length=100, total_epochs=5000,
+                          path = 'net_output/'):
+    """
+    Trains a neural network, taking time steps from state matrices as input
+    and output.
+    """
+    statematrices = readxml.createStateMatrices()
+    batches = []
+    for song in statematrices.values():
+        matrix = song[1]
+        while len(matrix) > 0:
+            batch = []
+            for i in xrange(batch_size):
+                if len(matrix) == 0:
+                    break
+                batch.append([[n for l in matrix.pop() for n in l]])
+            batches.append(zip(batch[:-1], batch[1:]))
 
-if __name__ == '__main__':
+    if not os.path.exists(path):
+            os.makedirs(path)
+
+    print('\nTraining network:')
+    for i in xrange(0, total_epochs, output_rate):
+        last = [[0] * 156]
+        statematrix = []
+        for j in xrange(output_length):
+            last = net.run(last)
+            statematrix.append(estimate_statematrix_from_output(last[0]))
+        midi_to_statematrix.noteStateMatrixToMidi(statematrix,
+                                    name=(path + 'example{0}'.format(i)))
+        print('\tfile example{0}.mid created'.format(i))
+        
+        for j in xrange(output_rate):
+            print('\t\t' + str(i + j))
+            for batch in batches:
+                net.train(batch, 1, .1, dropout, .5)
+                
+def estimate_statematrix_from_output(output):
+    """Given output from the neural net, construct a statematrix"""
+    matrix = []
+    for i in range(0, 156, 2):
+        pair = [round(output[i]), round(output[i+1])]
+        if pair in [[1, 1], [1, 0]]:
+            matrix.append(pair)
+        else:
+            matrix.append([0, 0])
+    return matrix
+    
+
+def binary_example():
     ##Example
     ##initialize MLP with eight inputs, a 3-node hidden layer, and eight outputs
     ##like the binary identity example
@@ -366,3 +422,8 @@ if __name__ == '__main__':
     mlp2 = load_MLP('testsaveRNN')
     print(mlp.layers[0].weights.get_value())
     print(mlp2.layers[0].weights.get_value())
+
+if __name__ == '__main__':
+    net = MLP(156, 156, [512, 512], True)
+    train_statematrix_net(net)
+    mlp.save('trained_statematrix_net')

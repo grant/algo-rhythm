@@ -415,9 +415,3 @@ def midiForXML(xmlFile, midiDestFile):
 if __name__ == "__main__":
   stateMatrices = createStateMatrices()
   print "{0} songs total.".format(len(stateMatrices))
-  if not os.path.exists('musicxml/midi/'):
-    os.makedirs('musicxml/midi/')
-  for k in stateMatrices.keys():
-    midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1],
-                                              name=("musicxml/midi/" +
-											  k.split('/')[1]))
