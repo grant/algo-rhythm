@@ -112,7 +112,7 @@ class Layer:
         """
         self.inputs.set_value(inputs)
         self.get_output()
-        if dropout != 0:
+        if dropout != 0 and not self.output:
             self.dropout(dropout)
         return self.outputs.get_value()
 
@@ -338,8 +338,8 @@ def load_MLP(path):
         l.weights.set_value(w)
     return mlp
         
-def train_statematrix_net(net, batch_size=100, dropout=.5, output_rate = 100,
-                          output_length=100, total_epochs=5000,
+def train_statematrix_net(net, batch_size=128, dropout=.5, output_rate = 100,
+                          output_length=128, total_epochs=5000,
                           path = 'net_output/'):
     """
     Trains a neural network, taking time steps from state matrices as input
@@ -370,6 +370,8 @@ def train_statematrix_net(net, batch_size=100, dropout=.5, output_rate = 100,
         midi_to_statematrix.noteStateMatrixToMidi(statematrix,
                                     name=(path + 'example{0}'.format(i)))
         print('\tfile example{0}.mid created'.format(i))
+        net.save(path + 'weights{0}/'.format(i))
+        print('\tweights saved in weights{0}'.format(i))
         
         for j in xrange(output_rate):
             print('\t\t' + str(i + j))
@@ -428,6 +430,6 @@ def binary_example():
     print(mlp2.layers[0].weights.get_value())
 
 if __name__ == '__main__':
-    net = MLP(156, 156, [512, 512], True)
+    net = MLP(156, 156, [256, 256], True)
     train_statematrix_net(net)
     mlp.save('trained_statematrix_net')
