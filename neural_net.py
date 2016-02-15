@@ -354,7 +354,7 @@ def train_statematrix_net(net, batch_size=128, dropout=.5, output_rate = 100,
             for i in xrange(batch_size):
                 if len(matrix) == 0:
                     break
-                batch.append([[n for l in matrix.pop() for n in l]])
+                batch.append([[n * 20 - 19 for l in matrix.pop() for n in l]])
             batches.append(zip(batch[:-1], batch[1:]))
 
     if not os.path.exists(path):
@@ -362,15 +362,16 @@ def train_statematrix_net(net, batch_size=128, dropout=.5, output_rate = 100,
 
     print('\nTraining network:')
     for i in xrange(0, total_epochs, output_rate):
-        last = [[0] * 156]
+        last = [[-1] * 156]
         statematrix = []
         for j in xrange(output_length):
-            last = net.run(last)
-            statematrix.append(estimate_statematrix_from_output(last[0]))
+            new = net.run(last)
+            statematrix.append(estimate_statematrix_from_output(new[0], last[0]))
+            last = new
         midi_to_statematrix.noteStateMatrixToMidi(statematrix,
                                     name=(path + 'example{0}'.format(i)))
         print('\tfile example{0}.mid created'.format(i))
-        net.save(path + 'weights{0}/'.format(i))
+        net.save(path + 'weights{0}'.format(i))
         print('\tweights saved in weights{0}'.format(i))
         
         for j in xrange(output_rate):
@@ -379,13 +380,16 @@ def train_statematrix_net(net, batch_size=128, dropout=.5, output_rate = 100,
                 net.train(batch, 1, .1, dropout, .5)
                 net.reset()
                 
-def estimate_statematrix_from_output(output):
+def estimate_statematrix_from_output(output, prev):
     """Given output from the neural net, construct a statematrix"""
     matrix = []
     for i in range(0, 156, 2):
-        pair = [round(output[i]), round(output[i+1])]
-        if pair in [[1, 1], [1, 0]]:
-            matrix.append(pair)
+        pair = [int(output[i] > 0), int(output[i+1] > 0)]
+        if pair[0] == 1:
+            if prev[i] > 0:
+                matrix.append([1, 0])
+            else:
+                matrix.append([1, 1])
         else:
             matrix.append([0, 0])
     return matrix
