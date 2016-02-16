@@ -1,0 +1,74 @@
+/* Global */
+
+html body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Header */
+header {
+  background-color: rgb(255, 89, 55);
+  text-align: center;
+}
+
+header .logo {
+  margin: 10px;
+}
+
+/* Content */
+
+.content {
+  margin: 20px auto;
+  width: 400px;
+}
+
+.content .title {
+  text-align: center;
+  font-size: 40px;
+  text-transform: uppercase;
+  font-weight: 100;
+  padding-bottom: 20px;
+  color: #ccc;
+}
+
+.play-pause {
+  text-align: center;
+
+  border-bottom: 1px dashed #ddd;
+  margin-bottom: 20px;
+}
+
+.play-pause .subtitle {
+  color: #ccc;
+  padding-bottom: 10px;
+}
+
+.play-pause .current-song {
+  font-style: italic;
+  color: #888;
+}
+
+.play-pause button {
+  padding: 10px;
+  margin: 20px;
+  overflow: hidden;
+  border: 1px dotted #eee;
+  min-width: 80px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.uploads .file {
+  margin: 20px;
+  font-size: 20px;
+  color: #bbb;
+}
+
+.upload .form {
+  padding: 10px 0;
+  text-align: center;
+}
