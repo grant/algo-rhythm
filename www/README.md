@@ -5,5 +5,5 @@
 pip install Flask
 
 # Start server
-python index.js
+python index.py
 ```
