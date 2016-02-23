@@ -53,4 +53,4 @@ def view_upload(name=None):
     return send_from_directory(UPLOAD_FOLDER, name)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=80)
