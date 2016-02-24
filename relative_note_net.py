@@ -1,5 +1,5 @@
 from neural_net import *
-import midi, os
+import midi, os, sys, time
 
 class RelativeNote:
     """
@@ -122,7 +122,11 @@ def train_note_list_net(net, lists, dropout=.5, output_rate = 100,
         print('\tweights saved in weights{0}'.format(i))
         
         for j in xrange(output_rate):
-            print('\t\t' + str(i + j))
+            print "{}: \t\t{}".format(time.strftime("%c"), i + j)
+            #print('\t\t' + str(i + j))
+            
+            sys.stdout.flush()
+
             for batch in batches:
                 net.reset()
                 net.train(batch, 1, .1, dropout, .5)
