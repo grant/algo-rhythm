@@ -141,7 +141,7 @@ def train_note_list_net(net, lists, dropout=.5, output_rate=100,
 
             for batch in batches:
                 net.reset()
-                net.train(batch, 1, .1, dropout, .5)
+                net.train(batch, 1, .075, dropout, .5)
 
 def note_list_net_generate(net, length, path, start_note=60, absolute = False):
     """
