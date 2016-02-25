@@ -70,7 +70,7 @@ def midi_to_note_list(track, absolute=False):
     for pitch, time, duration in notes:
         note = None
         if absolute:
-            note = AbsoluteNote(None, pitch, time = prev_time, duration)
+            note = AbsoluteNote(None, pitch, time - prev_time, duration)
         else:
             note = RelativeNote(None, pitch - prev_pitch,
                                 time - prev_time, duration)
