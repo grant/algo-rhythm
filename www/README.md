@@ -4,11 +4,14 @@
 # Install
 pip install Flask
 
-# Start server
-python index.py
+# Start server (will be exposed)
+sudo python index.py
+
+# Open the site
+open http://0.0.0.0:80/
 ```
 
-The server:
+Installed a newer version of python here:
 
 ```sh
 ssh rnnmusic@jetson3.cs.washington.edu
