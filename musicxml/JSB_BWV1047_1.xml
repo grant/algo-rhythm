@@ -136,6 +136,9 @@
 					<line>2</line>
 				</clef>
 			</attributes>
+                        <direction placement="above">
+                        <sound tempo="120"/>
+                        </direction>
 			<note>
 				<pitch>
 					<step>F</step>

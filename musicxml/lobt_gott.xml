@@ -99,6 +99,9 @@ reginaa@rambler.ru</credit-words>
           <line>4</line>
           </clef>
         </attributes>
+                        <direction placement="above">
+                        <sound tempo="60"/>
+                        </direction>
       <note default-x="87.33" default-y="-30.00">
         <pitch>
           <step>G</step>

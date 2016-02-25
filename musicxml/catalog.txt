@@ -1,7 +1,39 @@
+file string_quartet_k.xml
+file mozart_allegro.xml
+
+
+#begincomment
+
+
+
+file JSB_BWV1047_1.xml
+file JSB_BWV1050_2.xml
+file inv_no_1.xml
+file bach_inv_5.xml
+file inv_7.xml
+file inv_11.xml
+file inv_13.xml
+file inv_14.xml
+file inv_15.xml
+file wo_gott_bach.xml
+file lieder_und_1_brahms.xml
+file lobt_gott.xml
+file bouree_handel.xml
+file du_friedfurst_bwv116.xml
+file du_friedfurst2.xml
+file mozart_ave_verum.xml
+file pachelbel_cannon.xml
+file merry_christmas.xml
+
+
+
+file Allemande.xml
+start-time 0.5
+file bach_bwv248.xml
+start-time 1
+speed 20
 file fugue_in_D_minor_disputed.xml
 start-time 0
-file Allemande.mxl
-start-time 0.5
 file preludio.xml
 start-time 0
 file sinfonia-bach.xml
@@ -85,9 +117,6 @@ speed 10
 file du_friedfurst2.xml
 start-time 0
 speed 20
-file bach_bwv248.xml
-start-time 1
-speed 20
 file mozart_ave_verum.xml
 start-time 0
 speed 80
@@ -100,6 +129,4 @@ speed 2
 file merry_christmas.xml
 start-time 0
 speed 64
-
-
 

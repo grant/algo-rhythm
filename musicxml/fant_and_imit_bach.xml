@@ -79,6 +79,9 @@
           <line>4</line>
           </clef>
         </attributes>
+      <direction placement="above">
+        <sound tempo="120"/>
+        </direction>
       <note>
         <rest>
           <display-step>D</display-step>

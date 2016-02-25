@@ -106,6 +106,9 @@
           <line>2</line>
           </clef>
         </attributes>
+      <direction placement="above">
+        <sound tempo="60"/>
+        </direction>
       <note>
         <rest/>
         <duration>8</duration>

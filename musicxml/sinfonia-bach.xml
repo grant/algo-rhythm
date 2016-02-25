@@ -102,6 +102,9 @@
           <top-system-distance>170.00</top-system-distance>
           </system-layout>
         </print>
+      <direction placement="above">
+        <sound tempo="60"/>
+        </direction>
       <attributes>
         <divisions>8</divisions>
         <key>

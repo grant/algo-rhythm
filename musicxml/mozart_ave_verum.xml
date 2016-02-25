@@ -110,6 +110,9 @@
 					<line>2</line>
 				</clef>
 			</attributes>
+                        <direction placement="above">
+                        <sound tempo="240"/>
+                        </direction>
 			<direction placement="above">
 				<direction-type>
 					<words relative-x="378" default-y="123" font-family="Arial" font-size="20">Ave verum</words>

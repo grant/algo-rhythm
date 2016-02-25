@@ -61,6 +61,10 @@
           <staff-distance>65.00</staff-distance>
           </staff-layout>
         </print>
+
+                        <direction placement="above">
+                        <sound tempo="60"/>
+                        </direction>
       <attributes>
         <divisions>8</divisions>
         <key>

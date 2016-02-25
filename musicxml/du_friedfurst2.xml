@@ -188,6 +188,9 @@
 					<line>2</line>
 				</clef>
 			</attributes>
+                        <direction placement="above">
+                        <sound tempo="120"/>
+                        </direction>
 			<direction placement="above">
 				<direction-type>
 					<words default-x="-90" default-y="30" font-family="Times New Roman" font-size="12" font-weight="bold">3. Versus</words>

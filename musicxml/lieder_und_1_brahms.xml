@@ -88,6 +88,9 @@
 					<line>2</line>
 				</clef>
 			</attributes>
+                        <direction placement="above">
+                        <sound tempo="60"/>
+                        </direction>
 			<direction placement="above">
 				<direction-type>
 					<words default-x="-42" default-y="11" font-family="Times New Roman" font-size="13" font-weight="bold" font-style="italic">Vivace</words>

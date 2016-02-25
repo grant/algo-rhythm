@@ -220,6 +220,7 @@ for 2 high voices and piano / organ
      <metronome default-y="25" color="#000000" font-family="Times New Roman" font-style="normal" font-size="11.9365" font-weight="normal">
       <beat-unit>quarter</beat-unit>
       <per-minute>120</per-minute>
+                        <sound tempo="120"/>
      </metronome>
     </direction-type>
     <voice>1</voice>

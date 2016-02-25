@@ -85,6 +85,9 @@
           <line>4</line>
           </clef>
         </attributes>
+                        <direction placement="above">
+                        <sound tempo="60"/>
+                        </direction>
       <note>
         <rest/>
         <duration>2</duration>

@@ -3,8 +3,10 @@ import fractions
 import os
 import collections
 from collections import defaultdict
+import fractions
 
 import midi_to_statematrix
+import math
 
 lowerBound = 24
 upperBound = 102
@@ -148,15 +150,21 @@ def getNoteInfo(note, measureNum):
     return (midiPitch, duration, isChord, tieType)
 
 
-def iterateThroughMusic(e, handleNote, resolution = 1):
+def iterateThroughMusic(e, handleNote, handleMeasure = None, handleRest = None, handlePart = None):
+  #for legacy reasons
+  resolution = 1
   for part in e:
     if part.tag == 'part':
       partName = part.attrib['id']
+      if handlePart != None:
+        handlePart(partName)
       #keep track of the current time
       timePos = 0
       measureNum = 0
       lastNoteTimePos = 0
       for measure in part:
+        if handleMeasure != None:
+          handleMeasure()
         if measure.tag == 'measure':
           #remember measure start time
           #measureStartTime = timePos
@@ -189,6 +197,8 @@ def iterateThroughMusic(e, handleNote, resolution = 1):
               else:
                 #it's a rest
                 duration = res
+                if handleRest != None:
+                  handleRest(timePos, duration)
                 timePos += duration
             elif note.tag == 'backup':
               duration = getBackupLength(note)
@@ -197,103 +207,222 @@ def iterateThroughMusic(e, handleNote, resolution = 1):
               latestTime = timePos
           timePos = latestTime
 
+#look under the current node and return
+#the first node with the given name, if
+#it exists
+def getNodesUnderNodeWithName(node, name):
+  retlist = []
+  for el in node:
+    if el.tag == name:
+      retlist.append(el)
+    retlist = retlist + getNodesUnderNodeWithName(el, name)
+  return retlist
+
+#look under the current node and return
+#the first node with the given name, if
+#it exists
+def getNodeUnderNodeWithName(node, name):
+  thelist = getNodesUnderNodeWithName(node, name)
+  if thelist:
+    return thelist[0]
+  else:
+    return None
+
+#  for el in node:
+#    if el.tag == name:
+#      return el
+#    else:
+#      res = getNodeUnderNodeWithName(el, name)
+#      if res != None:
+#        return res
+#  return None
+
+
 #parse XML to find the tempo.  Note that for some songs,
 #no tempo will exists, in which case return None.  Also,
 #for some songs, there will be multiple tempos, in which
 #case probably just return the first one found.
 def getTempoForSong(tree):
-  for el in tree:
-    if el.tag == 'sound':
-      if 'tempo' in el.attrib.keys():
-        return int(round(float(el.attrib['tempo'])))
-    else:
-      res = getTempoForSong(el)
-      if res != None:
-        return res
+  soundNodes = getNodesUnderNodeWithName(tree, 'sound')
+  for soundNode in soundNodes:
+    if 'tempo' in soundNode.attrib.keys():
+      return int(round(float(soundNode.attrib['tempo'])))
   return None
 
+#return hashmap of part to int, where the int
+#is the amount to transpose each part in half steps.
+#if there is no transposition for a given part, it
+#can be omitted from the hash map
+def getTranspositions(tree):
+  ret = {}
+  parts = getNodesUnderNodeWithName(tree, 'part')
+  for part in parts:
+    if 'id' in part.attrib.keys():
+      partId = part.attrib['id']
+      transposeNode = getNodeUnderNodeWithName(part, 'transpose')
+      if transposeNode != None:
+        for chromatic in transposeNode:
+          if chromatic.tag == 'chromatic':
+            ret[partId] = int(chromatic.text)
+            break
+  return ret
 
-def stateMatrixForSong(tree, startTime, speed = None, slow = None, transpositions = {}):
+#we'll put this in its own routine, basically, the problem is,
+#suppose a beat can be divided into div1 divisions and div2
+#divisions. Suppose num specifies a point in time in divisions
+#along the first scale.  Can it be translated to a point in
+#time in units of the second scale?  If so, what is the number
+#of units (everything must be an integer)
+#In our code, this will be used to translate notes from "divs"
+#(time unit of XML file) to "slices" (time unit of statematrix)
+#If the note can't be translated then it is lost
+def translateToDifferentDivScale(num, divs1, divs2):
+  theGcd = fractions.gcd(divs1, divs2)
+  if num % (divs2/theGcd) != 0:
+    #we can't translate it
+    return None
+  else:
+    return num * divs2 / divs1
 
+def stateMatrixForSong(tree):
+
+  #examine tree for any transpositions
+  transpositions = getTranspositions(tree)
+
+  #examine tree for tempo
+  tempo = getTempoForSong(tree)
+  if tempo == None:
+    raise ValueError("can't produce state matrix for this XML, as there is no tempo")
+
+  #also, check music to see if there's a pickup.
+  #To do this, we look at the first two measures,
+  #if the lengths are different (as can be determined
+  #by looking at the notes and rests) then we have a
+  #nonzero pickup, which is the length of the first measure
+  class PickupLengthHandler:
+
+    def __init__(self):
+      self.measureNum = 0
+      self.latestTimeSeen = 0
+      self.measureLengths = [0, 0]
+
+    def __handleSomething(self, time, duration):
+      if self.measureNum == 1 or self.measureNum == 2:
+        index = self.measureNum - 1
+        if time + duration > self.measureLengths[index]:
+          self.measureLengths[index] = time + duration
+
+    def __call__(self, time, pitch, duration, part):
+      self.__handleSomething(time, duration)
+
+    def handleMeasure(self):
+      self.measureNum += 1
+
+    def handleRest(self, timePos, duration):
+      self.__handleSomething(timePos, duration)
+
+    def handlePart(self, partName):
+      self.partName = partName
+
+    def getPickupDivisions(self):
+      if self.measureLengths[0] == self.measureLengths[1]:
+        return 0
+      else:
+        return self.measureLengths[0]
+
+  plm = PickupLengthHandler()
+  iterateThroughMusic(tree, plm, plm.handleMeasure, plm.handleRest, plm.handlePart)
+
+  pickupDivisions = plm.getPickupDivisions()
+  pickupDivisionsPart = plm.partName
+
+  #This is a constant, but actually it should be an input parameter.  Anyways,
+  #given the tempo, the secondsPerSlice, and the divisions per beat, we should
+  #be able to figure out how divisions in the input correspond to slices in the
+  #output
   secondsPerSlice = 0.125
-  beatsPerMinute = 120
 
-  #basically we would like to know divisions per slice...
-
+  beatsPerMinute = float(tempo)
+  beatsPerSecond = beatsPerMinute / 60
+  
   #e = xml.etree.ElementTree.parse(xmlfile).getroot()
   e = tree
 
+  #returns hashmap, part to divisions number
   divisions = getDivisions(e)
-  #print divisions
-  tripleMeter = False
+
+  #compute lcm of divisions over various parts, this
+  #will be the divisions we use
+  divisionsLCM = None
   for k in divisions.keys():
-    if divisions[k] % 3 == 0:
-      #Turn this off
-      #print "Triple meter detected"
-      tripleMeter = True
+    thisDiv = divisions[k]
+    if divisionsLCM == None:
+      divisionsLCM = thisDiv
+    else:
+      divisionsLCM = (thisDiv * divisionsLCM)/fractions.gcd(thisDiv, divisionsLCM)
 
-  divisionsMax = None
-  for k in divisions.keys():
-    if divisionsMax == None:
-      divisionsMax = divisions[k]
-    elif divisionsMax < divisions[k]:
-      divisionsMax = divisions[k]
-
-  #check that the min divisions value divides every
-  #key in the map
-  for k in divisions.keys():
-    if divisionsMax % divisions[k] != 0:
-      print "min division ({1}) not divisible by division found ({0})!".format(divisions[k], divisionsMax)
+  #use divisions now to translate the pickup divisions for the given part, not all
+  #parts use the same division scale, so use the LCM scale
+  pickupDivisions *= (divisionsLCM/divisions[pickupDivisionsPart])
 
 
-  class handleNote_interval_visitor:
+  divisionsPerBeat = divisionsLCM
 
-    def __init__(self):
-      self.minTimeInterval = None
+  #this will be an exact floating point number
+  #print "secondsPerSlice: {}".format(secondsPerSlice)
+  #print "beatsPerSecond: {}".format(beatsPerSecond)
+  slicesPerBeat = 1 / (beatsPerSecond * secondsPerSlice)
 
-    def __call__(self, time, pitch, duration, part):
-      if time != 0:
-        if self.minTimeInterval == None:
-          self.minTimeInterval = time
-        else:
-          self.minTimeInterval = fractions.gcd(self.minTimeInterval, time)
-      if duration != 0:
-        if self.minTimeInterval == None:
-          self.minTimeInterval = duration
-        else:
-          self.minTimeInterval = fractions.gcd(self.minTimeInterval, duration)
+  #we require that the number of slices for a beat be an integer which
+  #is a power of two.  To do this, we'll take the log base 2, round
+  #to the nearest int, then compute inverse log
+  #print "SlicesPerBeat (real): {}".format(slicesPerBeat)
+  slicesPerBeat = int(2**(int(round(math.log(slicesPerBeat, 2)))))
 
-  visitor = handleNote_interval_visitor()
-  iterateThroughMusic(e, visitor)
-  minTimeInterval = visitor.minTimeInterval
+  #print "SlicesPerBeat: {}".format(slicesPerBeat)
+  #print "divisionsPerBeat: {}".format(divisionsPerBeat)
+
+  #compute gcd of slices per beat and divisions per beat
+  slicesDivisionsGcd = fractions.gcd(slicesPerBeat, divisionsPerBeat)
+
+  #we require that for a note to be resolved to slices, it's time in
+  #divisions must be divisible by this number
+  divisionsDivisor = divisionsPerBeat / slicesDivisionsGcd
+
+  #compute the size of the pickup in slices, this is information
+  #that will be needed for neural net training
+  pickupSlices = pickupDivisions * slicesPerBeat / divisionsPerBeat
+
+  #print "Pickup Divs: {}".format(pickupDivisions)
+  #print "Pickup Slices: {}".format(pickupSlices)
 
   stateMatrix = []
 
   def handleNote_createStateMatrix(time, pitch, duration, part):
     #if part == 'P2':
-      #print "Got note, pitch: {0}, duration: {1}, time: {2}".format(pitch, duration, time)
+    #print "Got note, pitch: {0}, duration: {1}, time: {2}".format(pitch, duration, time)
     pitch -= lowerBound
     if part in transpositions.keys():
       pitch += transpositions[part]
 
     #Sometimes different parts have different
-    #numbers of divisions, so we have to scale
-    #appropriately
-    if divisions[part] != divisionsMax:
-      slowFactor = (divisionsMax / divisions[part])
-      time *= slowFactor
-      duration *= slowFactor
+    #numbers of divisions, scale so that the time/
+    #duration is in terms of the LCM divisions
+    if divisions[part] != divisionsLCM:
+      #print "LCM scaling happening"
+      scalingFactor = (divisionsLCM / divisions[part])
+      time *= scalingFactor
+      duration *= scalingFactor
 
-    if slow != None:
-      time *= slow
-      duration *= slow
-    if speed != None:
-      #skip a note if its granularity
-      #is too fine
-      if time % speed != 0:
-        return
-      time /= speed
-      duration /= speed
+    #time and duration are in divisions, we need them in slices
+    if time % divisionsDivisor != 0:
+      #this note doesn't fall on a slice boundary so we just skip it
+      return
+    else:
+      time = time * slicesPerBeat / divisionsPerBeat
+      #print "duration before: {}".format(duration)
+      duration = duration * slicesPerBeat / divisionsPerBeat
+      #print "duration after: {}".format(duration)
       if duration == 0:
         duration = 1
 
@@ -305,6 +434,8 @@ def stateMatrixForSong(tree, startTime, speed = None, slow = None, transposition
     while len(stateMatrix) < time + duration:
       row = numPitches * [[0, 0]]
       stateMatrix.append(row)
+    #print "time: {}".format(time)
+    #print "size: {}".format(len(stateMatrix))
     stateMatrix[time][pitch] = [1, 1]
     for i in range(time + 1, time + duration):
       if stateMatrix[i][pitch] == [0, 0]:
@@ -314,22 +445,67 @@ def stateMatrixForSong(tree, startTime, speed = None, slow = None, transposition
     #that the division is at the lowest level for the piece,
     #we set the granularity to ignore this subdivision level
 
-  minTimeInterval = 1
-  for k in divisions.keys():
-    if divisions[k] % 3 == 0:
-      minTimeInterval = 3
+  iterateThroughMusic(e, handleNote_createStateMatrix)
 
-  iterateThroughMusic(e, handleNote_createStateMatrix, minTimeInterval)
-
-  if slow == None:
-    slow = 1
-  if speed == None:
-    speed = 1
-  return (int(round(startTime*divisionsMax*slow/speed)), stateMatrix)
+  return (pickupSlices, stateMatrix)
 
 
 def createStateMatrices():
-  f = open('musicxml/catalog.txt', "r")
+  basedir = 'musicxml/'
+
+  stateMatrices = {}
+
+  for theFile in os.listdir(os.getcwd() + '/' + basedir):
+    if not theFile.split('.')[-1] == 'xml':
+      continue
+        #parse xml file into document tree
+    print basedir + theFile
+    tree = xml.etree.ElementTree.parse(basedir + theFile).getroot()
+    if getTempoForSong(tree) == None:
+      print "File {} has no tempo!!!".format(theFile)
+    else:
+      stateMatrices[theFile] = stateMatrixForSong(tree)
+
+  return stateMatrices
+
+
+
+
+#NOTE: INTERFACE CHANGED--now returns 0 on success,
+#1 on failure, reason for failure is that there is
+#actually no tempo information in the xml file, so
+#we don't know how to convert to midi
+def midiForXML(xmlFile, midiDestFile):
+  #parse xml file into document tree
+  tree = xml.etree.ElementTree.parse(xmlFile).getroot()
+  tempo = getTempoForSong(tree)
+  #We're no longer using a default tempo, this was never
+  #really a good idea, since actually the various tempos
+  #can differ by an order of magnitued, instead, we return
+  #a code to indicate success or failure.
+  #if tempo == None:
+  #  tempo = 120
+  if tempo == None:
+    return 1
+  else:
+    stateMatrix = stateMatrixForSong(tree, 0)[1]
+    midi_to_statematrix.noteStateMatrixToMidi(stateMatrix, name=midiDestFile)
+    return 0    
+
+if __name__ == "__main__":
+  stateMatrices = createStateMatrices()
+  print "{0} songs total.".format(len(stateMatrices))
+  #print "Pwd: " + os.getcwd()
+  for k in stateMatrices.keys():
+    midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1], name='./midi_output_test/{}'.format(k))
+    
+
+
+#NO LONGER USED!!!!
+def createStateMatrices_old():
+  basedir = "musicxml/"
+
+  f = open(basedir + 'catalog.txt', "r")
   lines = f.readlines()
   f.close()
 
@@ -364,7 +540,8 @@ def createStateMatrices():
       pass
     else:
       continue
-    mxlfile = 'musicxml/' + toks[1]
+    origFilename = toks[1]
+    mxlfile = basedir + origFilename
     print mxlfile
 
     transpositions = {}
@@ -394,24 +571,11 @@ def createStateMatrices():
 
     #parse xml file into document tree
     tree = xml.etree.ElementTree.parse(mxlfile).getroot()
-    tempo = getTempoForSong(tree)
-    if tempo == None:
-      print "No tempo found"
+    if getTempoForSong(tree) == None:
+      print "File {} has no tempo!!!".format(mxlfile)
     else:
-      print "Tempo of {0} found".format(tempo)
-    stateMatrices[mxlfile] = stateMatrixForSong(tree, startTime, speed, slow, transpositions)
+      stateMatrices[origFilename] = stateMatrixForSong(tree)
 
   return stateMatrices
 
-def midiForXML(xmlFile, midiDestFile):
-  #parse xml file into document tree
-  tree = xml.etree.ElementTree.parse(xmlFile).getroot()
-  tempo = getTempoForSong(tree)
-  if tempo == None:
-    tempo = 120
-  stateMatrix = stateMatrixForSong(tree, 0)[1]
-  midi_to_statematrix.noteStateMatrixToMidi(stateMatrix, name=midiDestFile)
 
-if __name__ == "__main__":
-  stateMatrices = createStateMatrices()
-  print "{0} songs total.".format(len(stateMatrices))

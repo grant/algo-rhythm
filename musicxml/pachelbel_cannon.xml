@@ -114,6 +114,10 @@
 					<line>2</line>
 				</clef>
 			</attributes>
+
+                        <direction placement="above">
+                        <sound tempo="60"/>
+                        </direction>
 			<direction placement="above">
 				<direction-type>
 					<words default-x="-77" default-y="79" font-family="Times New Roman" font-size="14" font-weight="bold">Johann Pachelbel (1653-1706)

@@ -116,6 +116,9 @@
           <line>2</line>
           </clef>
         </attributes>
+                        <direction placement="above">
+                        <sound tempo="120"/>
+                        </direction>
       <note default-x="102.20" default-y="-35.00">
         <pitch>
           <step>F</step>
