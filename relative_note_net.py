@@ -1,6 +1,7 @@
 from neural_net import *
 import midi, os, sys, time
 
+
 class RelativeNote:
     """
     A RelativeNote stores a note's pitch and start time relative to the previous
@@ -33,7 +34,15 @@ class RelativeNote:
         duration = format(self.duration, '024b')
         return map(int, pitch + time + duration)[:56]
 
-def midi_to_note_list(track):
+class AbsoluteNote(RelativeNote):
+    """
+    Like a RelativeNote, but with pitches stored absolutely rather than
+    relatively. Time is still relative.
+    """
+    def get_absolute(self, pitch=0, time):
+        return (self.pitch, self.time + time, self.duration)
+
+def midi_to_note_list(track, absolute=False):
     """
     Reads a midi track into a list of RelativeNotes
     """
@@ -59,9 +68,13 @@ def midi_to_note_list(track):
     prev_time = 0
     note_list = []
     for pitch, time, duration in notes:
-        relative = RelativeNote(None, pitch - prev_pitch,
+        note = None
+        if absolute:
+            note = AbsoluteNote(None, pitch, time = prev_time, duration)
+        else:
+            note = RelativeNote(None, pitch - prev_pitch,
                                 time - prev_time, duration)
-        note_list.append(relative)
+        note_list.append(note)
         prev_time = time
         prev_pitch = pitch
     return note_list
@@ -99,9 +112,9 @@ def get_note_lists(path):
                     lists.append(l)
     return lists
 
-def train_note_list_net(net, lists, dropout=.5, output_rate = 100,
-                          output_length=64, total_epochs=5000,
-                          path = 'net_output/note_list/'):
+def train_note_list_net(net, lists, dropout=.5, output_rate=100,
+                        output_length=64, total_epochs=5000, absolute=False,
+                        path = 'net_output/note_list/'):
     """
     Trains a neural network, taking time notes from relative note lists
     as input.
@@ -116,22 +129,21 @@ def train_note_list_net(net, lists, dropout=.5, output_rate = 100,
 
     print('\nTraining network:')
     for i in xrange(0, total_epochs, output_rate):
-        note_list_net_generate(net, output_length, path + '{0}.mid'.format(i))
+        note_list_net_generate(net, output_length, path + '{0}.mid'.format(i),
+                               absolute = absolute)
         print('\tfile example{0}.mid created'.format(i))
         net.save(path + 'weights{0}'.format(i))
         print('\tweights saved in weights{0}'.format(i))
         
         for j in xrange(output_rate):
-            print "{}: \t\t{}".format(time.strftime("%c"), i + j)
-            #print('\t\t' + str(i + j))
-            
+            print "\t\t{}: {}".format(time.strftime("%c"), i + j)
             sys.stdout.flush()
 
             for batch in batches:
                 net.reset()
                 net.train(batch, 1, .1, dropout, .5)
 
-def note_list_net_generate(net, length, path, start_note=60):
+def note_list_net_generate(net, length, path, start_note=60, absolute = False):
     """
     Generate a snippet of music with custom length using a note_list net.
     The net must be seeded with an initial note (which will not be played),
@@ -142,7 +154,10 @@ def note_list_net_generate(net, length, path, start_note=60):
     notes = []
     for i in xrange(length):
         note = net.run(last)
-        notes.append(RelativeNote(map(lambda x: int(round(x)), note[0])))
+        if absolute:
+            notes.append(AbsoluteNote(map(lambda x: int(round(x)), note[0])))
+        else:
+            notes.append(RelativeNote(map(lambda x: int(round(x)), note[0])))
         last = note
     midi.write_midifile(path, midi.Pattern([note_list_to_midi(notes)]))
 
