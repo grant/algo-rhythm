@@ -162,7 +162,9 @@ def note_list_net_generate(net, length, path, start_note=60, absolute = False):
     midi.write_midifile(path, midi.Pattern([note_list_to_midi(notes)]))
 
 if __name__ == '__main__':
-    net = MLP(56, 56, [256, 256], True)
+    if len(sys.argv) != 2:
+        print 'Usage: python relative_note_net.py [boolean]'
+    net = MLP(56, 56, [256, 256], sys.argv[1])
     lists = get_note_lists('midisamples_raw/')
     train_note_list_net(net, lists)
             
