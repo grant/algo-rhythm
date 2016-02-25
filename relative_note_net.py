@@ -39,7 +39,7 @@ class AbsoluteNote(RelativeNote):
     Like a RelativeNote, but with pitches stored absolutely rather than
     relatively. Time is still relative.
     """
-    def get_absolute(self, pitch=0, time):
+    def get_absolute(self, pitch, time):
         return (self.pitch, self.time + time, self.duration)
 
 def midi_to_note_list(track, absolute=False):
