@@ -39,7 +39,7 @@ class AbsoluteNote(RelativeNote):
     Like a RelativeNote, but with pitches stored absolutely rather than
     relatively. Time is still relative.
     """
-    def get_absolute(self, pitch=0, time):
+    def get_absolute(self, pitch, time):
         return (self.pitch, self.time + time, self.duration)
 
 def midi_to_note_list(track, absolute=False):
@@ -70,7 +70,7 @@ def midi_to_note_list(track, absolute=False):
     for pitch, time, duration in notes:
         note = None
         if absolute:
-            note = AbsoluteNote(None, pitch, time = prev_time, duration)
+            note = AbsoluteNote(None, pitch, time - prev_time, duration)
         else:
             note = RelativeNote(None, pitch - prev_pitch,
                                 time - prev_time, duration)
@@ -141,7 +141,7 @@ def train_note_list_net(net, lists, dropout=.5, output_rate=100,
 
             for batch in batches:
                 net.reset()
-                net.train(batch, 1, .1, dropout, .5)
+                net.train(batch, 1, .075, dropout, .5)
 
 def note_list_net_generate(net, length, path, start_note=60, absolute = False):
     """
@@ -162,7 +162,9 @@ def note_list_net_generate(net, length, path, start_note=60, absolute = False):
     midi.write_midifile(path, midi.Pattern([note_list_to_midi(notes)]))
 
 if __name__ == '__main__':
-    net = MLP(56, 56, [256, 256], True)
+    if len(sys.argv) != 2:
+        print 'Usage: python relative_note_net.py [boolean]'
+    net = MLP(56, 56, [256, 256], bool(sys.argv[1]))
     lists = get_note_lists('midisamples_raw/')
     train_note_list_net(net, lists)
             
