@@ -450,8 +450,7 @@ def stateMatrixForSong(tree):
   return (pickupSlices, stateMatrix)
 
 
-def createStateMatrices():
-  basedir = 'musicxml/'
+def createStateMatrices(basedir = 'musicxml'):
 
   stateMatrices = {}
 
@@ -459,8 +458,8 @@ def createStateMatrices():
     if not theFile.split('.')[-1] == 'xml':
       continue
         #parse xml file into document tree
-    print basedir + theFile
-    tree = xml.etree.ElementTree.parse(basedir + theFile).getroot()
+    print basedir + '/' + theFile
+    tree = xml.etree.ElementTree.parse(basedir + '/' + theFile).getroot()
     if getTempoForSong(tree) == None:
       print "File {} has no tempo!!!".format(theFile)
     else:
