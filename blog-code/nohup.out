@@ -1,0 +1,12 @@
+Using gpu device 0: GM20B (CNMeM is disabled)
+Traceback (most recent call last):
+  File "main.py", line 42, in <module>
+    pcs = multi_training.loadPieces("music")
+  File "/home/rnnmusic/cclauson/biaxial-rnn-music-composition/multi_training.py", line 22, in loadPieces
+    outMatrix = midiToNoteStateMatrix(os.path.join(dirpath, fname))
+  File "/home/rnnmusic/cclauson/biaxial-rnn-music-composition/midi_to_statematrix.py", line 52, in midiToNoteStateMatrix
+    timeleft[i] = None
+KeyboardInterrupt
+Using gpu device 0: GM20B (CNMeM is disabled)
+Using gpu device 0: GM20B (CNMeM is disabled)
+WARNING (theano.gof.compilelock): Overriding existing lock by dead process '28173' (I am process '29375')

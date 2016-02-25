@@ -1,0 +1,207 @@
+nohup: ignoring input
+Using gpu device 0: GM20B (CNMeM is disabled)
+Loaded beethoven_les_adieux_1
+Loaded waldstein_1
+Loaded liz_rhap15
+Loaded beethoven_opus10_3
+Loaded chpn_op27_1
+Loaded mond_1
+Loaded chpn_op35_3
+Loaded mendel_op19_4
+Loaded haydn_9_1
+Loaded mz_311_2
+Loaded grieg_berceuse
+Loaded appass_3
+Loaded rav_gib
+Loaded ty_juni
+Loaded grieg_kobold
+Loaded liz_et4
+Loaded chpn_op10_e01
+Loaded liz_et_trans5
+Loaded beethoven_opus22_4
+Loaded beethoven_opus10_2
+Loaded mz_545_3
+Loaded burg_gewitter
+Loaded grieg_butterfly
+Loaded mz_330_3
+Loaded chpn-p1
+Loaded chpn_op25_e4
+Loaded liz_rhap12
+Loaded haydn_35_1
+Loaded haydn_33_1
+Loaded mz_333_1
+Loaded burg_trennung
+Loaded bach_850
+Loaded mendel_op30_5
+Loaded alb_esp5
+Loaded chpn-p23
+Loaded pathetique_2
+Loaded liz_et5
+Loaded mz_331_3
+Loaded grieg_halling
+Loaded liz_et_trans4
+Loaded bor_ps5
+Loaded chpn_op25_e12
+Loaded liz_rhap02
+Loaded chpn-p15
+Loaded chpn_op35_4
+Loaded chpn_op10_e12
+Loaded chpn-p20
+Loaded mz_570_2
+Loaded haydn_43_1
+Loaded mendel_op53_5
+Loaded bach_847
+Loaded burg_quelle
+Loaded alb_esp2
+Loaded mz_311_1
+Loaded debussy_cc_4
+Loaded liz_et2
+Loaded ty_september
+Loaded haydn_8_3
+Loaded chpn-p16
+Loaded muss_4
+Loaded mz_545_1
+Loaded ty_november
+Loaded mz_332_2
+Loaded chpn-p3
+Loaded grieg_zwerge
+Loaded waldstein_3
+Loaded debussy_cc_6
+Loaded mz_333_3
+Loaded grieg_waechter
+Loaded chpn_op66
+Loaded appass_2
+Loaded burg_agitato
+Loaded haydn_43_3
+Loaded chpn_op10_e05
+Loaded beethoven_les_adieux_2
+Loaded ty_februar
+Loaded chpn-p9
+Loaded brahms_opus1_2
+Loaded grieg_wedding
+Loaded chpn-p8
+Loaded burg_erwachen
+Loaded mendel_op30_3
+Loaded mz_570_3
+Loaded chpn_op25_e11
+Loaded hay_40_2
+Loaded mendel_op62_3
+Loaded br_rhap
+Loaded ty_maerz
+Loaded bor_ps1
+Loaded haydn_9_3
+Loaded ty_oktober
+Loaded chpn_op25_e1
+Loaded haydn_8_1
+Loaded debussy_cc_1
+Loaded liz_rhap09
+Loaded chpn-p14
+Loaded pathetique_1
+Loaded debussy_cc_2
+Loaded bor_ps7
+Loaded mendel_op30_1
+Loaded deb_prel
+Loaded haydn_35_2
+Loaded chpn-p4
+Loaded chpn_op35_1
+Loaded ty_juli
+Loaded brahms_opus1_1
+Loaded pathetique_3
+Loaded beethoven_opus90_2
+Loaded beethoven_opus22_1
+Loaded burg_spinnerlied
+Loaded grieg_once_upon_a_time
+Loaded mz_330_1
+Loaded chpn_op25_e2
+Loaded chpn-p2
+Loaded mendel_op19_1
+Loaded muss_8
+Loaded beethoven_hammerklavier_1
+Loaded bach_846
+Loaded mond_3
+Loaded haydn_7_1
+/home/rnnmusic/cclauson/biaxial-rnn-music-composition/model.py:367: UserWarning: Updating an `OrderedUpdates` with a non-ordered dictionary with 2+ elements could make your code non-deterministic
+  self.walk_input: next_input
+/home/rnnmusic/cclauson/biaxial-rnn-music-composition/model.py:370: UserWarning: Updating an `OrderedUpdates` with a non-ordered dictionary with 2+ elements could make your code non-deterministic
+  updates.update({hidden:newstate for hidden, newstate, layer in zip(self.walk_hiddens, new_states, self.time_model.layers) if has_hidden(layer)})
+Thu Feb 18 01:21:34 2016: epoch 0, error=127698.742188
+Thu Feb 18 02:02:17 2016: epoch 100, error=14461.7705078
+Thu Feb 18 02:43:13 2016: epoch 200, error=12640.0078125
+Thu Feb 18 03:24:18 2016: epoch 300, error=10366.4443359
+Thu Feb 18 04:05:22 2016: epoch 400, error=10392.84375
+Thu Feb 18 04:46:34 2016: epoch 500, error=9206.20996094
+Thu Feb 18 05:27:40 2016: epoch 600, error=8068.97363281
+Thu Feb 18 06:08:49 2016: epoch 700, error=8171.93652344
+Thu Feb 18 06:49:52 2016: epoch 800, error=6500.13867188
+Thu Feb 18 07:30:59 2016: epoch 900, error=7304.03564453
+Thu Feb 18 08:12:09 2016: epoch 1000, error=6738.39355469
+Thu Feb 18 08:53:02 2016: epoch 1100, error=4987.94189453
+Thu Feb 18 09:33:02 2016: epoch 1200, error=6136.02978516
+Thu Feb 18 10:12:58 2016: epoch 1300, error=5498.74755859
+Thu Feb 18 10:53:01 2016: epoch 1400, error=5836.31152344
+Thu Feb 18 11:32:59 2016: epoch 1500, error=5198.71679688
+Thu Feb 18 12:13:53 2016: epoch 1600, error=5063.04150391
+Thu Feb 18 12:53:54 2016: epoch 1700, error=5812.53027344
+Thu Feb 18 13:33:48 2016: epoch 1800, error=4292.93505859
+Thu Feb 18 14:13:51 2016: epoch 1900, error=4162.83886719
+Thu Feb 18 14:53:46 2016: epoch 2000, error=4968.07519531
+Thu Feb 18 15:34:45 2016: epoch 2100, error=4042.03222656
+Thu Feb 18 16:14:42 2016: epoch 2200, error=5568.16015625
+Thu Feb 18 16:54:42 2016: epoch 2300, error=4902.99951172
+Thu Feb 18 17:34:43 2016: epoch 2400, error=4725.27734375
+Thu Feb 18 18:14:37 2016: epoch 2500, error=5908.15820312
+Thu Feb 18 18:55:33 2016: epoch 2600, error=4157.39550781
+Thu Feb 18 19:35:26 2016: epoch 2700, error=4010.08178711
+Thu Feb 18 20:15:32 2016: epoch 2800, error=4101.89794922
+Thu Feb 18 20:55:27 2016: epoch 2900, error=4617.02929688
+Thu Feb 18 21:35:27 2016: epoch 3000, error=4968.20117188
+Thu Feb 18 22:16:25 2016: epoch 3100, error=3868.22998047
+Thu Feb 18 22:56:24 2016: epoch 3200, error=3692.99975586
+Thu Feb 18 23:36:27 2016: epoch 3300, error=4151.09033203
+Fri Feb 19 00:16:27 2016: epoch 3400, error=3047.60986328
+Fri Feb 19 00:56:31 2016: epoch 3500, error=4251.03466797
+Fri Feb 19 01:37:24 2016: epoch 3600, error=3662.20458984
+Fri Feb 19 02:17:29 2016: epoch 3700, error=3613.46508789
+Fri Feb 19 02:57:26 2016: epoch 3800, error=4106.24755859
+Fri Feb 19 03:37:21 2016: epoch 3900, error=3431.81640625
+Fri Feb 19 04:17:24 2016: epoch 4000, error=3614.39648438
+Fri Feb 19 04:58:15 2016: epoch 4100, error=3796.80834961
+Fri Feb 19 05:38:17 2016: epoch 4200, error=3307.91723633
+Fri Feb 19 06:18:16 2016: epoch 4300, error=3131.9140625
+Fri Feb 19 06:58:19 2016: epoch 4400, error=2728.10498047
+Fri Feb 19 07:38:16 2016: epoch 4500, error=4261.36816406
+Fri Feb 19 08:19:12 2016: epoch 4600, error=3270.9765625
+Fri Feb 19 08:59:18 2016: epoch 4700, error=3145.86987305
+Fri Feb 19 09:39:12 2016: epoch 4800, error=3559.58422852
+Fri Feb 19 10:19:14 2016: epoch 4900, error=3301.57202148
+Fri Feb 19 10:59:08 2016: epoch 5000, error=2692.14428711
+Fri Feb 19 11:40:06 2016: epoch 5100, error=3841.99267578
+Fri Feb 19 12:20:01 2016: epoch 5200, error=3200.375
+Fri Feb 19 13:00:02 2016: epoch 5300, error=3664.31103516
+Fri Feb 19 13:40:12 2016: epoch 5400, error=2670.77978516
+Fri Feb 19 14:20:10 2016: epoch 5500, error=3260.98095703
+Fri Feb 19 15:01:11 2016: epoch 5600, error=3493.55883789
+Fri Feb 19 15:41:07 2016: epoch 5700, error=3752.46679688
+Fri Feb 19 16:21:09 2016: epoch 5800, error=2935.23779297
+Fri Feb 19 17:01:09 2016: epoch 5900, error=3086.99853516
+Fri Feb 19 17:41:12 2016: epoch 6000, error=2950.39086914
+Fri Feb 19 18:22:04 2016: epoch 6100, error=3632.58349609
+Fri Feb 19 19:02:00 2016: epoch 6200, error=4111.37890625
+Fri Feb 19 19:42:01 2016: epoch 6300, error=3513.74536133
+Fri Feb 19 20:21:57 2016: epoch 6400, error=2201.32299805
+Fri Feb 19 21:01:59 2016: epoch 6500, error=3443.40136719
+Fri Feb 19 21:42:52 2016: epoch 6600, error=3373.2331543
+Fri Feb 19 22:22:58 2016: epoch 6700, error=4106.58300781
+Fri Feb 19 23:02:56 2016: epoch 6800, error=2622.62133789
+Fri Feb 19 23:42:55 2016: epoch 6900, error=2960.421875
+Sat Feb 20 00:23:01 2016: epoch 7000, error=2412.81665039
+Sat Feb 20 01:03:57 2016: epoch 7100, error=3036.52294922
+Sat Feb 20 01:43:56 2016: epoch 7200, error=2285.66064453
+Sat Feb 20 02:23:55 2016: epoch 7300, error=3566.03442383
+Sat Feb 20 03:03:58 2016: epoch 7400, error=2560.87768555
+Sat Feb 20 03:43:59 2016: epoch 7500, error=2521.78027344
+Sat Feb 20 04:25:03 2016: epoch 7600, error=2455.43432617
+Sat Feb 20 05:05:44 2016: epoch 7700, error=3522.31860352
+Sat Feb 20 05:46:16 2016: epoch 7800, error=3228.47338867
+Sat Feb 20 06:27:07 2016: epoch 7900, error=2036.90112305
+Sat Feb 20 07:08:35 2016: epoch 8000, error=2682.24291992
