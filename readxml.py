@@ -450,7 +450,7 @@ def stateMatrixForSong(tree):
   return (pickupSlices, stateMatrix)
 
 
-def createStateMatrices(basedir = 'musicxml'):
+def createStateMatrices(basedir = 'musicxml', minslices = 0):
 
   stateMatrices = {}
 
@@ -463,7 +463,12 @@ def createStateMatrices(basedir = 'musicxml'):
     if getTempoForSong(tree) == None:
       print "File {} has no tempo!!!".format(theFile)
     else:
-      stateMatrices[theFile] = stateMatrixForSong(tree)
+      sm = stateMatrixForSong(tree)
+      songMatrix = sm[1]
+      if len(songMatrix) < minslices:
+        print "File {} omitted, it is too short."
+      else:
+        stateMatrices[theFile] = sm
 
   return stateMatrices
 
