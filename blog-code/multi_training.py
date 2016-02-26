@@ -40,7 +40,11 @@ def loadPieces(dirpath):
 
 def getPieceSegment(pieces):
     piece_output = random.choice(pieces.values())
-    start = random.randrange(0,len(piece_output)-batch_len,division_len)
+    piecelen = len(piece_output)-batch_len
+    if piecelen == batch_len:
+      start = 0
+    else:
+      start = random.randrange(0,len(piece_output)-batch_len,division_len)
     # print "Range is {} {} {} -> {}".format(0,len(piece_output)-batch_len,division_len, start)
 
     seg_out = piece_output[start:start+batch_len]
