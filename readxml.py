@@ -466,7 +466,7 @@ def createStateMatrices(basedir = 'musicxml', minslices = 0):
       sm = stateMatrixForSong(tree)
       songMatrix = sm[1]
       if len(songMatrix) < minslices:
-        print "File {} omitted, it is too short."
+        print "File {} omitted, it is too short.".format(theFile)
       else:
         stateMatrices[theFile] = sm
 
