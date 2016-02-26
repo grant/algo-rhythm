@@ -46,8 +46,7 @@ def getPieceSegment(pieces):
     elif piecelen < batch_len:
       raise ValueError("Found piece which was too short...")
     else:
-      try:
-        start = random.randrange(0, piecelen - batch_len, division_len)
+      start = random.randrange(0, piecelen - batch_len, division_len)
       
     # print "Range is {} {} {} -> {}".format(0,len(piece_output)-batch_len,division_len, start)
 
