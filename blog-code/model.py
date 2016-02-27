@@ -74,14 +74,9 @@ def ensure_list(result):
 
 class Model(object):
     
-    def __init__(self, t_layer_sizes = None, p_layer_sizes = None, dropout=0):
+    def __init__(self, t_layer_sizes = [300,300], p_layer_sizes = [100,50], dropout=0):
         
         self.dropout = dropout
-
-        #basically if no parameters were passed, then
-        #don't do any constructor initialization
-        if t_layer_sizes == None:
-          return
 
         self.t_layer_sizes = t_layer_sizes
         self.p_layer_sizes = p_layer_sizes
@@ -124,6 +119,7 @@ class Model(object):
 
     @learned_config.setter
     def learned_config(self, learned_list):
+        print "Setter called"
         self.time_model.params = learned_list[0]
         self.pitch_model.params = learned_list[1]
         for l, val in zip((l for mod in (self.time_model, self.pitch_model) for l in mod.layers if has_hidden(l)), learned_list[2]):
