@@ -45,4 +45,7 @@ if __name__ == '__main__':
 
 	multi_training.trainPiece(m, pcs, 10000)
 
-	pickle.dump( m.learned_config, open( "output/final_learned_config.p", "wb" ) )
+	pickle.dump( m.learned_config, open( "output/final_learned_config.p", "wb" ) 
+)
+
+

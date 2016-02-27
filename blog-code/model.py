@@ -74,8 +74,15 @@ def ensure_list(result):
 
 class Model(object):
     
-    def __init__(self, t_layer_sizes, p_layer_sizes, dropout=0):
+    def __init__(self, t_layer_sizes = None, p_layer_sizes = None, dropout=0):
         
+        self.dropout = dropout
+
+        #basically if no parameters were passed, then
+        #don't do any constructor initialization
+        if t_layer_sizes == None:
+          return
+
         self.t_layer_sizes = t_layer_sizes
         self.p_layer_sizes = p_layer_sizes
 
