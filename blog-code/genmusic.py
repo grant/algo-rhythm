@@ -7,7 +7,7 @@ import sys
 def modelFromFile(filename):
   learned_list = pickle.load(open(filename, 'rb'))
   mod = model.Model()
-  mod.learned_config(learned_list)
+  mod.learned_config = learned_list
 
 
 if __name__ == '__main__':
