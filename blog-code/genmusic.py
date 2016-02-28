@@ -16,10 +16,13 @@ if __name__ == '__main__':
     exit(1)
 
   paramfile = sys.argv[1]
+
+  print "Loading model from file {}".format(paramfile)
   mod = modelFromFile(paramfile)
+  print "Done loading model."
 
 
-  pitchrange = midi_to_statematrix.upperBount - midi_to_statematrix.lowerBound
+  pitchrange = midi_to_statematrix.upperBound - midi_to_statematrix.lowerBound
   #We need to construct one slice to initialize the music generation
   firstSlice = []
   for i in range(0, pitchrange):
@@ -36,5 +39,7 @@ if __name__ == '__main__':
   xIpt = noteStateMatrixToInputForm(firstSlice)
 
   slices_to_generate = 128*16
+  print "Generating music to output/generated..."
   noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), 'output/generated')
+  print "Done."
 
