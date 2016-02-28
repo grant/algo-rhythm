@@ -284,13 +284,19 @@ def translateToDifferentDivScale(num, divs1, divs2):
   else:
     return num * divs2 / divs1
 
-def stateMatrixForSong(tree):
+#parses XML, delivering events to the callback
+#that indicate note locations/durations in
+#slices.  This can be used as a basis for parsing
+#XML into various specific data structures
+#also, this function returns a number indicating
+#the number of slices that are actually a pickup
+def parseXMLToSomething(xmltree, noteCreationCallback):
 
   #examine tree for any transpositions
-  transpositions = getTranspositions(tree)
+  transpositions = getTranspositions(xmltree)
 
   #examine tree for tempo
-  tempo = getTempoForSong(tree)
+  tempo = getTempoForSong(xmltree)
   if tempo == None:
     raise ValueError("can't produce state matrix for this XML, as there is no tempo")
 
@@ -331,7 +337,7 @@ def stateMatrixForSong(tree):
         return self.measureLengths[0]
 
   plm = PickupLengthHandler()
-  iterateThroughMusic(tree, plm, plm.handleMeasure, plm.handleRest, plm.handlePart)
+  iterateThroughMusic(xmltree, plm, plm.handleMeasure, plm.handleRest, plm.handlePart)
 
   pickupDivisions = plm.getPickupDivisions()
   pickupDivisionsPart = plm.partName
@@ -346,7 +352,7 @@ def stateMatrixForSong(tree):
   beatsPerSecond = beatsPerMinute / 60
   
   #e = xml.etree.ElementTree.parse(xmlfile).getroot()
-  e = tree
+  e = xmltree
 
   #returns hashmap, part to divisions number
   divisions = getDivisions(e)
@@ -396,12 +402,10 @@ def stateMatrixForSong(tree):
   #print "Pickup Divs: {}".format(pickupDivisions)
   #print "Pickup Slices: {}".format(pickupSlices)
 
-  stateMatrix = []
-
   def handleNote_createStateMatrix(time, pitch, duration, part):
     #if part == 'P2':
     #print "Got note, pitch: {0}, duration: {1}, time: {2}".format(pitch, duration, time)
-    pitch -= lowerBound
+    pitch
     if part in transpositions.keys():
       pitch += transpositions[part]
 
@@ -426,6 +430,31 @@ def stateMatrixForSong(tree):
       if duration == 0:
         duration = 1
 
+    noteCreationCallback(time, pitch, duration)
+
+
+    #ad hoc--if divisions are divisible by 3, then assume
+    #that the division is at the lowest level for the piece,
+    #we set the granularity to ignore this subdivision level
+
+  iterateThroughMusic(e, handleNote_createStateMatrix)
+
+  return pickupSlices
+
+#wrapper that takes filename instead of tree
+def parseXMLFileToSomething(xmlFile, noteCreationCallback):
+  tree = xml.etree.ElementTree.parse(xmlFile).getroot()
+  return parseXMLToSomething(tree, noteCreationCallback)
+
+def stateMatrixForSong(tree):
+
+  stateMatrix = []
+
+  def handleNoteCreation(time, pitch, duration):
+    #for state matrices, we shift pitch down
+    #by lower bound constant
+    pitch -= lowerBound
+
     #if necessary, extend state matrix so
     #that the desired times exists
     #last time needed is time + duration - 1,
@@ -441,11 +470,7 @@ def stateMatrixForSong(tree):
       if stateMatrix[i][pitch] == [0, 0]:
         stateMatrix[i][pitch] = [1, 0]
 
-    #ad hoc--if divisions are divisible by 3, then assume
-    #that the division is at the lowest level for the piece,
-    #we set the granularity to ignore this subdivision level
-
-  iterateThroughMusic(e, handleNote_createStateMatrix)
+  pickupSlices = parseXMLToSomething(tree, handleNoteCreation)
 
   return (pickupSlices, stateMatrix)
 
