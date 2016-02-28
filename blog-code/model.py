@@ -119,7 +119,6 @@ class Model(object):
 
     @learned_config.setter
     def learned_config(self, learned_list):
-        print "Setter called"
         self.time_model.params = learned_list[0]
         self.pitch_model.params = learned_list[1]
         for l, val in zip((l for mod in (self.time_model, self.pitch_model) for l in mod.layers if has_hidden(l)), learned_list[2]):
