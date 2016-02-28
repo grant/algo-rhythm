@@ -33,7 +33,6 @@ if __name__ == '__main__':
         pair[1] = 1
     firstSlice.append(pair)
   firstSlice = [firstSlice]
-  midi_to_statematrix.makeSegInSegOutFromStateMatrix(firstSlice)
 
   xOpt = firstSlice
   xIpt = noteStateMatrixToInputForm(firstSlice)
