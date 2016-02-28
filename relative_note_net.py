@@ -11,13 +11,15 @@ class RelativeNote:
     def __init__(self, binary=None, pitch=0, time=0, duration=0):
         if binary != None:
             binary = map(str, binary)
-            self.pitch = int(''.join(binary[:8]), 2)
-            if binary[0] == 1:
-                self.pitch -= (1 << 8) 
+            self.pitch = int(''.join(binary[:4]), 2)
+            self.octave = int(''.join(binary[4:8]), 2)
+            if binary[4] == 1:
+                self.pitch -= (1 << 4) 
             self.time = int(''.join(binary[8:32]), 2)
             self.duration = int(''.join(binary[32:56]), 2)
         else:
-            self.pitch = pitch
+            self.pitch = pitch % 12
+            self.octave = pitch / 12
             self.time = time
             self.duration = duration
 
@@ -26,14 +28,16 @@ class RelativeNote:
         Return the absolute pitch, time, and duration in a tuple given the
         previous note.
         """
-        return (self.pitch + pitch, self.time + time, self.duration)
+        return (self.octave * 12 + self.pitch + pitch,
+                self.time + time, self.duration)
 
     def get_binary(self):
-        pitch = format(self.pitch if self.pitch >= 0
-                       else (1 << 8) + self.pitch, '08b')
-        time = format(self.time, '024b')
-        duration = format(self.duration, '024b')
-        return map(int, pitch + time + duration)[:56]
+        pitch = format(self.pitch, '04b')
+        octave = format(self.octave if self.octave >= 0
+                       else (1 << 4) + self.pitch, '04b')
+        time = format(self.time, '016b')
+        duration = format(self.duration, '016b')
+        return map(int, pitch + octave + time + duration)[:56]
 
 class AbsoluteNote(RelativeNote):
     """
@@ -41,7 +45,7 @@ class AbsoluteNote(RelativeNote):
     relatively. Time is still relative.
     """
     def get_absolute(self, pitch, time):
-        return (self.pitch, self.time + time, self.duration)
+        return (self.pitch + self.octave * 12, self.time + time, self.duration)
 
 def midi_to_note_list(track, absolute=False):
     """
@@ -227,7 +231,7 @@ def note_list_net_generate(net, length, path, start_note=60, absolute = False):
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print 'Usage: python relative_note_net.py [boolean]'
-    net = MLP(56, 56, [256, 256], bool(sys.argv[1]))
+    net = MLP(40, 40, [256, 256], bool(sys.argv[1]))
     #lists = get_note_lists('midisamples_raw/')
     lists = get_note_lists_XML('musicxml/')
     train_note_list_net(net, lists)
