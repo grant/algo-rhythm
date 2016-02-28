@@ -1,7 +1,7 @@
 import cPickle as pickle
 from midi_to_statematrix import *
 import model, multi_training, midi_to_statematrix
-import sys, random
+import sys, random, data
 
 
 def modelFromFile(filename):
@@ -35,7 +35,7 @@ if __name__ == '__main__':
   firstSlice = [firstSlice]
 
   xOpt = firstSlice
-  xIpt = noteStateMatrixToInputForm(firstSlice)
+  xIpt = data.noteStateMatrixToInputForm(firstSlice)
 
   slices_to_generate = 128*16
   print "Generating music to output/generated..."
