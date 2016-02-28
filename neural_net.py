@@ -437,3 +437,5 @@ if __name__ == '__main__':
     net = MLP(156, 156, [256, 256], True)
     train_statematrix_net(net)
     mlp.save('trained_statematrix_net')
+
+

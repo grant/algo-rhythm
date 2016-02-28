@@ -37,10 +37,10 @@ def loadPieces(dirpath):
       pieces[key] = tmp[key][1]
     return pieces
 
-def makeSegInSegOutFromStateMatrix(stateMatrix):
-    seg_out = stateMatrix[start:start+batch_len]
-    seg_in = noteStateMatrixToInputForm(seg_out)
-    return seg_in, seg_out
+#def makeSegInSegOutFromStateMatrix(stateMatrix):
+#    seg_out = stateMatrix[start:start+batch_len]
+#    seg_in = noteStateMatrixToInputForm(seg_out)
+#    return seg_in, seg_out
 
 
 def getPieceSegment(pieces):
@@ -55,12 +55,12 @@ def getPieceSegment(pieces):
       
     # print "Range is {} {} {} -> {}".format(0,len(piece_output)-batch_len,division_len, start)
 
-    #seg_out = piece_output[start:start+batch_len]
-    #seg_in = noteStateMatrixToInputForm(seg_out)
+    seg_out = piece_output[start:start+batch_len]
+    seg_in = noteStateMatrixToInputForm(seg_out)
 
-    #return seg_in, seg_out
+    return seg_in, seg_out
 
-    return makeSegInSegOutFromStateMatrix(piece_output)
+    #return makeSegInSegOutFromStateMatrix(piece_output)
 
 def getPieceBatch(pieces):
     i,o = zip(*[getPieceSegment(pieces) for _ in range(batch_width)])

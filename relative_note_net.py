@@ -48,11 +48,13 @@ def midi_to_note_list(track, absolute=False):
     """
     tick = 0
     notes = []
+    #maps pitches to (index, time) pairs, where index
+    #is an index into the notes list
     started_notes = {}
     for event in track:
         tick += event.tick
         if isinstance(event, midi.NoteOffEvent) or isinstance(
-            event, midi.NoteOnEvent) and event.velocity == 0:
+                event, midi.NoteOnEvent) and event.velocity == 0:
             index, time = started_notes[event.pitch]
             notes[index] = (event.pitch, time, tick - time)
         elif isinstance(event, midi.NoteOnEvent):
@@ -167,4 +169,5 @@ if __name__ == '__main__':
     net = MLP(56, 56, [256, 256], bool(sys.argv[1]))
     lists = get_note_lists('midisamples_raw/')
     train_note_list_net(net, lists)
-            
+
+
