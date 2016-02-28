@@ -1,7 +1,7 @@
 import cPickle as pickle
 from midi_to_statematrix import *
 import model, multi_training, midi_to_statematrix
-import sys, random, data
+import sys, random, data, time
 
 
 def modelFromFile(filename):
@@ -17,9 +17,10 @@ if __name__ == '__main__':
 
   paramfile = sys.argv[1]
 
-  print "Loading model from file {}".format(paramfile)
+  print "{}: Loading model from file {}".format(time.strftime("%c"), paramfile)
+  sys.stdout.flush()
   mod = modelFromFile(paramfile)
-  print "Done loading model."
+  print "{}: Done loading model.".format(time.strftime("%c"))
 
 
   pitchrange = midi_to_statematrix.upperBound - midi_to_statematrix.lowerBound
@@ -38,7 +39,7 @@ if __name__ == '__main__':
   xIpt = data.noteStateMatrixToInputForm(firstSlice)
 
   slices_to_generate = 128*16
-  print "Generating music to output/generated..."
+  print "{}: Generating music to output/generated...".format(time.strftime("%c"))
   noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), 'output/generated')
-  print "Done."
+  print "{}: Done.".format(time.strftime("%c"))
 
