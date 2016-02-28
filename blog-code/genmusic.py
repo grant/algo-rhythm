@@ -1,7 +1,7 @@
 import cPickle as pickle
 from midi_to_statematrix import *
-import model, multi_training
-import sys
+import model, multi_training, midi_to_statematrix
+import sys, random
 
 
 def modelFromFile(filename):
@@ -18,4 +18,23 @@ if __name__ == '__main__':
   paramfile = sys.argv[1]
   mod = modelFromFile(paramfile)
 
-  noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), model.predict_fun(batch_len, 1, xIpt[0])), axis=0),'output/generated'.format(i))
+
+  pitchrange = midi_to_statematrix.upperBount - midi_to_statematrix.lowerBound
+  #We need to construct one slice to initialize the music generation
+  firstSlice = []
+  for i in range(0, pitchrange):
+    pair = [0, 0]
+    if random.randrange(10) > 7:
+      pair[0] = 1
+      if random.randrange(10) > 5:
+        pair[1] = 1
+    firstSlice.append(pair)
+  firstSlice = [firstSlice]
+  midi_to_statematrix.makeSegInSegOutFromStateMatrix(firstSlice)
+
+  xOpt = firstSlice
+  xIpt = noteStateMatrixToInputForm(firstSlice)
+
+  slices_to_generate = 128*16
+  noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), 'output/generated')
+

@@ -99,3 +99,5 @@ def noteStateMatrixToMidi(statematrix, name="example"):
     track.append(eot)
 
     midi.write_midifile("{}.mid".format(name), pattern)
+
+
