@@ -28,10 +28,10 @@ if __name__ == '__main__':
   firstSlice = []
   for i in range(0, pitchrange):
     pair = [0, 0]
-    if random.randrange(10) > 7:
-      pair[0] = 1
-      if random.randrange(10) > 5:
-        pair[1] = 1
+    #if random.randrange(10) > 7:
+    #  pair[0] = 1
+    #  if random.randrange(10) > 5:
+    #    pair[1] = 1
     firstSlice.append(pair)
   firstSlice = [firstSlice]
 
