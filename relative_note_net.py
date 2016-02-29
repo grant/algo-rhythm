@@ -110,7 +110,8 @@ def note_list_to_midi(notes, tickscale = 1):
         if pitch > 0 and pitch < 128:
             track.append(midi.NoteOnEvent(tick=time * tickscale, pitch=pitch,
                                           velocity=60))
-            track.append(midi.NoteOffEvent(tick=(time+duration) * tickscale, pitch=pitch))
+            track.append(midi.NoteOffEvent(tick=(time+duration) * tickscale,
+                                           pitch=pitch))
     track.sort(key=lambda x: x.tick)
     track.append(midi.EndOfTrackEvent(tick=track[-1].tick + 1
                                       if len(track) else 0))
@@ -122,9 +123,9 @@ def note_lists_for_file(filename):
     retval = []
     pattern = midi.read_midifile(filename)
     for track in pattern:
-      l = midi_to_note_list(track)
-      if len(l):
-        retval.append(l)
+        l = midi_to_note_list(track)
+        if len(l):
+            retval.append(l)
     return retval
 
 def get_note_lists(path):
@@ -137,15 +138,15 @@ def get_note_lists(path):
             lists.extend(note_lists_for_file(path + f))
     return lists
 
-def get_notelist_for_xml(filename):
+def get_notelist_for_xml(filename, absolute=False):
 
     abstimenotelist = []
 
     def handleNoteDetection(time, pitch, duration):
-      #code here to handle the detection of a note
-      #in XML, we actually need to cache them in
-      #a list
-      abstimenotelist.append((time, pitch, duration))
+        #code here to handle the detection of a note
+        #in XML, we actually need to cache them in
+        #a list
+        abstimenotelist.append((time, pitch, duration))
 
 
     #we can get the number of slices for pickup here,
@@ -156,25 +157,27 @@ def get_notelist_for_xml(filename):
     abstimenotelist.sort(key=lambda x: x[0])
 
     currtime = 0
+    currpitch = 0
     retlist = []
 
     for time, pitch, duration in abstimenotelist:
-      #print "Note with pitch {} at time: {}".format(pitch, time)
-      #print "Relative: {}".format(time - currtime)
-      retlist.append(AbsoluteNote(None, pitch, time - currtime, duration))
-      currtime = time
+        if absolute:
+            retlist.append(AbsoluteNote(None, pitch, time - currtime, duration))
+        else:
+            retlist.append(RelativeNote(None, pitch - currpitch,
+                                        time - currtime, duration))
+        currtime = time
 
     return retlist
 
-def get_note_lists_XML(path):
+def get_note_lists_XML(path, absolute=False):
     """
     Extract RelativeNote lists from all midi files in a folder.
     """
     lists = []
     for f in os.listdir(path):
         if f.endswith('.xml'):
-            lists.append(get_notelist_for_xml(path + f))
-            #lists.extend(note_lists_for_file(path + f))
+            lists.append(get_notelist_for_xml(path + f), absolute)
     return lists
 
 
@@ -231,9 +234,10 @@ def note_list_net_generate(net, length, path, start_note=60, absolute = False):
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print 'Usage: python relative_note_net.py [boolean]'
-    net = MLP(40, 40, [256, 256], bool(sys.argv[1]))
-    #lists = get_note_lists('midisamples_raw/')
-    lists = get_note_lists_XML('musicxml/')
-    train_note_list_net(net, lists)
+    else:
+        net = MLP(40, 40, [256, 256], bool(sys.argv[1]))
+        #lists = get_note_lists('midisamples_raw/')
+        lists = get_note_lists_XML('musicxml/', sys.argv[1])
+        train_note_list_net(net, lists)
 
 
