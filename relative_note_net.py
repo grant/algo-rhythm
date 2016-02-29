@@ -179,7 +179,7 @@ def get_note_lists_XML(path, absolute=False):
     lists = []
     for f in os.listdir(path):
         if f.endswith('.xml'):
-            lists.append(get_notelist_for_xml(path + f), absolute)
+            lists.append(get_notelist_for_xml(path + f, absolute))
     return lists
 
 
