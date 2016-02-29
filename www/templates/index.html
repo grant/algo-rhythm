@@ -53,7 +53,7 @@
     <div class="trainingprocesses">
       <h1 class="title">Training Processes</h1>
       {% for tp in trainingprocesses %}
-        <li class="file">{{ tp }}</li>
+        <li class="file"><a href="trainingprocesses/{{ tp }}">{{ tp }}</a></li>
       {% endfor %}
     </div>
     <div class="trainedconfigs">

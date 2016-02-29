@@ -91,6 +91,13 @@ def train():
 def view_upload(name=None):
     return send_from_directory(UPLOAD_FOLDER, name)
 
+# View training process log
+@app.route('/trainingprocesses/<name>', methods=['GET', 'POST'])
+def view_training_process(name=None):
+    prefix = "<html><head></head><body><pre>\n"
+    postfix = "</pre></body></html>"
+    return prefix + datamodel.getOutputForTrainingProcess(name) + postfix
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
 

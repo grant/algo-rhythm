@@ -96,7 +96,7 @@ class AlgorythmDatamodel:
     if not processName in self.trainingProcesses:
       return "(terminated)"
     else:
-      proc, targetconfig, q, output = self.trainingProcesses[trainingProcess]
+      proc, targetconfig, q, output = self.trainingProcesses[processName]
       return output
 
 
