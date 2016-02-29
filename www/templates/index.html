@@ -29,7 +29,10 @@
     <div class="uploads">
       <h1 class="title">Uploaded files</h1>
       {% for file in files %}
+        <!--
         <li class="file"><a href="{{ file.url }}">{{ file.name }}</a></li>
+        -->
+        <li class="file">{{ file }}</li>
       {% endfor %}
     </div>
     <div class="upload">
@@ -39,9 +42,31 @@
         <input type="submit" value="Upload">
       </form>
     </div>
+    <div class="train">
+      <h1 class="title">Train Configuration</h1>
+      <form action="/train" method="post" enctype="multipart/form-data" class="form">
+        <li class="file">Process name:<input type="text" name="processname"></li>
+        <li class="file">Config name:<input type="text" name="configname"></li>
+        <input type="submit">
+      </form>
+    </div>
+    <div class="trainingprocesses">
+      <h1 class="title">Training Processes</h1>
+      {% for tp in trainingprocesses %}
+        <li class="file">{{ tp }}</li>
+      {% endfor %}
+    </div>
+    <div class="trainedconfigs">
+      <h1 class="title">Trained Configurations</h1>
+      {% for tc in trainedconfigs %}
+        <li class="file">{{ tc }}</li>
+      {% endfor %}
+    </div>
   </div>
 
   <!-- Scripts -->
   <script type="text/javascript" src="static/midi.js"></script>
 </body>
 </html>
+
+

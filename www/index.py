@@ -7,6 +7,10 @@ from werkzeug import secure_filename
 from os import listdir
 from os.path import isfile, join
 
+import algorythm_datamodel
+
+datamodel = algorythm_datamodel.AlgorythmDatamodel()
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = set(['xml'])
 
@@ -32,8 +36,10 @@ def get_uploaded_files():
 # Home
 @app.route('/')
 def home():
-    files = get_uploaded_files()
-    return render_template('index.html', files=files)
+    #files = get_uploaded_files()
+    files = datamodel.getTrainingFiles()
+    #return render_template('index.html', files=files)
+    return render_template('index.html', files=files, trainingprocesses=datamodel.getTrainingProcessNames(), trainedconfigs=datamodel.getCompletedTrainedConfigs())
 
 # Upload new file
 @app.route('/upload', methods=['GET', 'POST'])
@@ -47,6 +53,39 @@ def upload_file():
     elif request.method == 'GET':
         return redirect('/')
 
+# Upload new file
+@app.route('/train', methods=['POST'])
+def train():
+    f = request.form
+    processName = None
+    configName = None
+    for key in f.keys():
+      print "Looking at key {}".format(key)
+      if key == 'configname':
+        l = f.getlist(key)
+        if l:
+          configName = l[0]
+      elif key == 'processname':
+        l = f.getlist(key)
+        if l:
+          processName = l[0]
+    if processName == None or configName == None:
+      #probably don't do any of the following things, just
+      #redirect home, but anyways for now
+      raise RuntimeError("process name is None")
+    if processName in datamodel.getTrainingProcessNames():
+      #invalid process name, we should do something
+      pass
+    if configName in datamodel.getCompletedTrainedConfigs():
+      #this is the name of an existing trained config, invalid, do something
+      pass
+    if configName in datamodel.getTrainedConfigsInProgress():
+      #there is already training happening to a config if this name, invalid, do something
+      pass
+    #create the new training process
+    datamodel.startTrainingProcess(processName, 'backend/trained_configs/' + configName)
+    return redirect('/')
+
 # View uploaded file
 @app.route('/uploads/<name>', methods=['GET', 'POST'])
 def view_upload(name=None):
@@ -54,3 +93,5 @@ def view_upload(name=None):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
+
+
