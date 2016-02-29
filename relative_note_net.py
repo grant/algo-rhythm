@@ -152,7 +152,8 @@ def get_notelist_for_xml(filename, absolute=False):
     #we can get the number of slices for pickup here,
     #but not sure what to do with it, one possibility
     #is to slice off initial notes in the pickup
-    pickupSlices = readxml.parseXMLFileToSomething(filename, handleNoteDetection)
+    pickup_slices = readxml.parseXMLFileToSomething(filename,
+                                                   handleNoteDetection)
 
     abstimenotelist.sort(key=lambda x: x[0])
 
@@ -167,6 +168,7 @@ def get_notelist_for_xml(filename, absolute=False):
             retlist.append(RelativeNote(None, pitch - currpitch,
                                         time - currtime, duration))
         currtime = time
+        currpitch = pitch
 
     return retlist
 
