@@ -62,6 +62,27 @@
         <li class="file">{{ tc }}</li>
       {% endfor %}
     </div>
+    <div class="generatemusic">
+      <h1 class="title">Generate Music</h1>
+      <ul>
+        {% for tc in trainedconfigs %}
+          <li>
+            <input type="radio" id={{tc}}> <label for="cbox" + {{tc}}>{{tc}}</label>
+          </li>
+        {% endfor %}
+      </ul>
+      <h2>Number of seconds</h2>
+      <input type="text">
+      <input type="submit" value="Generate">
+    </div>
+    <div class="generatedmusic">
+      <h1 class="title">Generated Music</h1>
+      <ul>
+        {% for tm in trainedmusic %}
+          <li>{{tm}}</li>
+        {% endfor %}
+      </ul>
+    </div>
   </div>
 
   <!-- Scripts -->

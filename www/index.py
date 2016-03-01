@@ -12,6 +12,7 @@ import algorythm_datamodel
 datamodel = algorythm_datamodel.AlgorythmDatamodel()
 
 UPLOAD_FOLDER = 'uploads'
+CONFIG_FOLDER = 'backend/trained_configs'
 ALLOWED_EXTENSIONS = set(['xml'])
 
 # Setup flask
@@ -21,6 +22,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(CONFIG_FOLDER):
+    os.makedirs(CONFIG_FOLDER)
 
 # Helper methods
 def allowed_file(filename):
@@ -39,7 +42,12 @@ def home():
     #files = get_uploaded_files()
     files = datamodel.getTrainingFiles()
     #return render_template('index.html', files=files)
-    return render_template('index.html', files=files, trainingprocesses=datamodel.getTrainingProcessNames(), trainedconfigs=datamodel.getCompletedTrainedConfigs())
+    return render_template('index.html',
+      files=files,
+      trainingprocesses=datamodel.getTrainingProcessNames(),
+      trainedconfigs=datamodel.getCompletedTrainedConfigs(),
+      trainedmusic=[]
+    )
 
 # Upload new file
 @app.route('/upload', methods=['GET', 'POST'])
@@ -85,6 +93,14 @@ def train():
     #create the new training process
     datamodel.startTrainingProcess(processName, 'backend/trained_configs/' + configName)
     return redirect('/')
+
+# Generate music
+@app.route('/train', methods=['POST'])
+def generate_music():
+  # error handling....
+  # datamodel.startMusicProcess(processName, configName, seconds, 'backend/trained_music/' + configName)
+  return redirect('/')
+
 
 # View uploaded file
 @app.route('/uploads/<name>', methods=['GET', 'POST'])
