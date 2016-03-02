@@ -39,11 +39,12 @@ body > .header {
   display: flex;
   flex-direction: column;
   justify-content: center;
-
   height: 100px;
-/*  height: 100%;
+}
+/* onload animation */
+body.animate > .header {
+  height: 100%;
   animation: moveUp 2s normal forwards ease-in-out;
-*/
 }
 
 header .logo {
@@ -81,6 +82,9 @@ header .logo {
   color: #ccc;
 }
 
+.content input, .content label {
+  cursor: pointer;
+}
 .content input[type="submit"], .button {
   border: none;
   color: #fff;
@@ -89,7 +93,6 @@ header .logo {
   padding: 4px 8px;
   border-radius: 3px;
   background-color: rgb(255, 89, 55);
-  cursor: pointer;
   line-height: 1.3;
 }
 .content input[type="submit"]:hover {

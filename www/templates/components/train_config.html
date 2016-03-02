@@ -14,7 +14,9 @@
       {% endfor %}
     </ul>
     <h3 class="subtitle">Number of Iterations</h3>
-    <input type="number" min="1" max="9999">
+    <input type="number" name="iterations" required="true" min="1" max="9999">
+    <h3 class="subtitle">Config Name</h3>
+    <input type="text" name="name" required="true">
     <input type="submit" value="Generate Config">
   </form>
 </section>

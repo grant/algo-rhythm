@@ -11,8 +11,8 @@ import algorythm_datamodel
 
 datamodel = algorythm_datamodel.AlgorythmDatamodel()
 
-UPLOAD_FOLDER = 'uploads'
-CONFIG_FOLDER = 'backend/trained_configs'
+UPLOAD_FOLDER = datamodel.UPLOAD_DIR
+CONFIG_FOLDER = datamodel.CONFIG_DIR
 ALLOWED_EXTENSIONS = set(['xml'])
 
 # Setup flask
@@ -37,10 +37,14 @@ def get_uploaded_files():
 # Setup routes
 
 # Home
+# /?animate=false Turns animation off
 @app.route('/')
 def home():
-    #files = get_uploaded_files()
+    # By default loads the animation
+    animate = request.args.get('animate') != 'false'
+
     return render_template('index.html',
+        animate=animate,
         files=datamodel.getTrainingFiles(),
         trainingprocesses=
         # datamodel.getTrainingProcessNames(),
@@ -84,52 +88,40 @@ def about():
     return render_template('about.html')
 
 # Upload new file
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect('/')
-    elif request.method == 'GET':
-        return redirect('/')
+    file = request.files['file']
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    else:
+        raise RuntimeError("upload bad file type")
+    return redirect('/?animate=false')
 
 # Upload new file
 @app.route('/train', methods=['POST'])
 def train():
-    f = request.form
-    processName = None
-    configName = None
-    for key in f.keys():
-      #print "Looking at key {}".format(key)
-      if key == 'configname':
-        l = f.getlist(key)
-        if l:
-          configName = l[0]
-      elif key == 'processname':
-        l = f.getlist(key)
-        if l:
-          processName = l[0]
-    if processName == None or configName == None:
-      #probably don't do any of the following things, just
-      #redirect home, but anyways for now
-      raise RuntimeError("process name is None")
-    if processName in datamodel.getTrainingProcessNames():
-      #invalid process name, we should do something
-      pass
-    if configName in datamodel.getCompletedTrainedConfigs():
-      #this is the name of an existing trained config, invalid, do something
-      pass
-    if configName in datamodel.getTrainedConfigsInProgress():
-      #there is already training happening to a config if this name, invalid, do something
-      pass
-    #create the new training process
-    datamodel.startTrainingProcess(processName, configName, datamodel.getTrainingFiles(), 100) #100 seconds
+    files = request.form.getlist('file')
+    iterations = request.form['iterations']
+    name = request.form['name']
+
+    # Error checking
+    if len(files) == 0:
+        raise RuntimeError('No files checked')
+    if name in datamodel.getCompletedTrainedConfigs():
+        raise RuntimeError('Config with that name already exists')
+
+    # Create the new training process
+    datamodel.startTrainingProcess(
+        newProcessName=name,
+        targetConfig=name,
+        xmlFileList=files,
+        numIterations=iterations,
+    )
     return redirect('/')
 
 # Generate music
-@app.route('/train', methods=['POST'])
+@app.route('/generate', methods=['POST'])
 def generate_music():
   # error handling....
   # datamodel.startMusicProcess(processName, configName, seconds, 'backend/trained_music/' + configName)
