@@ -1,4 +1,4 @@
-import algorythm_datamodel
+import backend as back
 import os
 from flask import Flask, request, redirect
 from flask import jsonify
@@ -6,13 +6,14 @@ from flask import render_template
 from flask import send_from_directory
 from os import listdir
 from os.path import isfile, join
+from werkzeug.utils import secure_filename
 
-datamodel = algorythm_datamodel.AlgorythmDatamodel()
+backend = back.Backend()
 
-UPLOAD_FOLDER = datamodel.UPLOAD_DIR
-CONFIG_FOLDER = datamodel.CONFIG_DIR
-GENERATED_SONG_FOLDER = datamodel.GENERATED_SONG_DIR
-ALLOWED_EXTENSIONS = set(['xml'])
+UPLOAD_FOLDER = back.UPLOAD_DIR
+CONFIG_FOLDER = back.CONFIG_DIR
+GENERATED_SONG_FOLDER = back.GENERATED_SONG_DIR
+ALLOWED_EXTENSIONS = {'xml'}
 
 # Setup flask
 app = Flask(__name__)
@@ -50,7 +51,7 @@ def home():
     return render_template(
         'index.html',
         animate=animate,
-        files=datamodel.getTrainingFiles(),
+        files=backend.getTrainingFiles(),
         trainingprocesses=
         # datamodel.getTrainingProcessNames(),
         [{
@@ -60,8 +61,7 @@ def home():
             'name': 'file 4',
             'progress': 10,
         }],
-        trainedconfigs=
-        datamodel.getCompletedTrainedConfigs(),
+        trainedconfigs=backend.getCompletedTrainedConfigs(),
         generationprocesses=[
             {
                 'name': 'file 3',
@@ -116,11 +116,11 @@ def train():
     # Error checking
     if len(files) == 0:
         raise RuntimeError('No files checked')
-    if name in datamodel.getCompletedTrainedConfigs():
+    if name in backend.getCompletedTrainedConfigs():
         raise RuntimeError('Config with that name already exists')
 
     # Create the new training process
-    datamodel.startTrainingProcess(
+    backend.startTrainingProcess(
         newProcessName=name,
         targetConfig=name,
         xmlFileList=files,
@@ -148,12 +148,12 @@ def view_upload(name=None):
 def view_training_process(name=None):
     prefix = "<html><head></head><body><pre>\n"
     postfix = "</pre></body></html>"
-    return prefix + datamodel.getOutputForTrainingProcess(name) + postfix
+    return prefix + backend.getOutputForTrainingProcess(name) + postfix
 
 
 @app.route('/status', methods=['GET'])
 def status():
-    return jsonify(**datamodel.getStatus())
+    return jsonify(**backend.getStatus())
 
 
 if __name__ == '__main__':
