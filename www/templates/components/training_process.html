@@ -1,9 +1,9 @@
 {% import 'macros/progress_bar_macro.html' as progress_bar %}
 
-<section class="section training-processes">
+<section class="section training-configs">
   <h1 class="title">Configs Being Generated</h1>
   <ul>
-    {% for config in trainingprocesses %}
+    {% for config in trainingconfigs %}
       <li class="config">
         {{ progress_bar.progress_bar(config.name, config.progress) }}
       </li>

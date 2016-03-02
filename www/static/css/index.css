@@ -198,8 +198,8 @@ header .logo {
 }
 
 /* song-generation-processes */
-/* training-processes */
-.song-generation-processes .song, .training-processes .config {
+/* training-configs */
+.song-generation-processes .song, .training-configs .config {
   margin: 10px 0;
 }
 

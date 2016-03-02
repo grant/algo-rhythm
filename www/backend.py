@@ -7,13 +7,12 @@ UPLOAD_DIR = 'backend/music_uploads/'
 CONFIG_DIR = 'backend/trained_configs/'
 GENERATED_SONG_DIR = 'backend/generated_music/'
 
-
 class Backend:
     # some constants:
 
     def __init__(self):
-        self.trainingProcesses = {}
-        self.musicGenProcesses = {}
+        self.training_configs = {}
+        self.generating_songs = {}
 
     def __check_process_triple(self, processTriple):
         """
@@ -44,57 +43,51 @@ class Backend:
 
     def __cleanup(self):
         dead = set()
-        for trainingProcess in self.trainingProcesses.keys():
-            triple, targetConfig = self.trainingProcesses[trainingProcess]
+        for trainingProcess in self.training_configs.keys():
+            triple, targetConfig = self.training_configs[trainingProcess]
             stillAlive, triple = self.__check_process_triple(triple)
-            self.trainingProcesses[trainingProcess] = (triple, targetConfig)
+            self.training_configs[trainingProcess] = (triple, targetConfig)
             if not stillAlive:
                 dead.add(trainingProcess)
         for tp in dead:
             # delete dead processes from hashmap
-            del self.trainingProcesses[tp]
+            del self.training_configs[tp]
         dead = set()
-        for genProcess in self.musicGenProcesses.keys():
-            triple, targetConfig = self.musicGenProcesses[genProcess]
+        for genProcess in self.generating_songs.keys():
+            triple, targetConfig = self.generating_songs[genProcess]
             stillAlive, triple = self.__check_process_triple(triple)
-            self.musicGenProcesses[genProcess] = (triple, targetConfig)
+            self.generating_songs[genProcess] = (triple, targetConfig)
             if not stillAlive:
                 dead.add(genProcess)
         for gp in dead:
             # delete dead processes from hashmap
-            del self.musicGenProcesses[gp]
+            del self.generating_songs[gp]
 
-    def getTrainingFiles(self):
+    def get_music_files(self):
         self.__cleanup()
         return os.listdir(UPLOAD_DIR)
 
-    def getCompletedTrainedConfigs(self):
+    def get_trained_configs(self):
         self.__cleanup()
         return os.listdir(CONFIG_DIR)
 
-    def getGeneratedMusic(self):
+    def get_generated_songs(self):
         self.__cleanup()
         return os.listdir(GENERATED_SONG_DIR)
 
-    def getTrainedConfigsInProgress(self):
+    def get_training_configs(self):
         self.__cleanup()
-        ret = []
-        for procname in self.trainingProcesses.keys():
-            triple, targetConfig = self.trainingProcesses[procname]
-            ret.append(targetConfig)
-        return ret
+        return [{
+            'name': self.training_configs[config][1],
+            'output': self.get_config_output(config)
+        } for config in self.training_configs.keys()]
 
-    def getTrainingProcessNames(self):
+    def get_generating_songs(self):
         self.__cleanup()
-        return self.trainingProcesses.keys()
-
-    def getMusicBeingGenerated(self):
-        self.__cleanup()
-        ret = []
-        for procname in self.musicGenProcesses.keys():
-            triple, targetMusicFile = self.trainingProcesses[procname]
-            ret.append(targetMusicFile)
-        return ret
+        return [{
+            'name': self.training_configs[procname][1],
+            'output': self.get_generating_song_output(procname),
+        } for procname in self.generating_songs.keys()]
 
     def __start_process_from_command(self, cmd):
         """
@@ -119,29 +112,28 @@ class Backend:
 
         return process, queue, ''
 
-    def start_training_process(self, process_name, config, file_names, iterations, start_config=None):
+    def start_training_process(self, config, files, iterations, start_config=None):
         self.__cleanup()
-        trainingFiles = self.getTrainingFiles()
-        for xmlfile in file_names:
-            if not xmlfile in trainingFiles:
+        trainingFiles = self.get_music_files()
+        for xmlfile in files:
+            if xmlfile not in trainingFiles:
                 raise ValueError("got {} as xml file argument, but this is not a training file")
-        if start_config != None:
+        if start_config is not None:
             raise ValueError("Start config not supported yet")
-        if process_name == None:
-            raise ValueError("got None as process name")
-        if process_name in self.trainingProcesses.keys():
-            raise ValueError("name {} is already a training process".format(process_name))
-        if config in self.getCompletedTrainedConfigs():
+        if config in self.get_trained_configs():
             raise ValueError("target config name {} is already an existing config".format(config))
-        if config in self.getTrainedConfigsInProgress():
+        if config in [name for name, output in self.get_training_configs()]:
             raise ValueError(
                 "target config name {} is already in use by currently running process".format(config))
 
-        cmd = ['python', 'train_dummy.py', CONFIG_DIR + config,
-               ' '.join([UPLOAD_DIR + xmlfile for xmlfile in file_names]), str(iterations)]
-        processTriple = self.__start_process_from_command(cmd)
-
-        self.trainingProcesses[process_name] = (processTriple, config)
+        cmd = [
+            'python',
+            'train_dummy.py',
+            CONFIG_DIR + config,
+            ' '.join([UPLOAD_DIR + xmlfile for xmlfile in files]),
+            str(iterations)
+        ]
+        self.training_configs[config] = (self.__start_process_from_command(cmd), config)
 
     def start_music_generation_process(self, process_name, trained_config, output_song_name, song_length):
         """
@@ -154,11 +146,11 @@ class Backend:
         self.__cleanup()
         if process_name == None:
             raise ValueError("got None as process name")
-        if process_name in self.musicGenProcesses.keys():
+        if process_name in self.generating_songs.keys():
             raise ValueError("name {} is already a music generation process".format(process_name))
-        if output_song_name in self.getGeneratedMusic():
+        if output_song_name in self.get_generated_songs():
             raise ValueError("target music file {} is already a generated piece of music".format(output_song_name))
-        if output_song_name in self.getMusicBeingGenerated():
+        if output_song_name in self.get_generating_songs():
             raise ValueError(
                 "target music file  {} is already being generated by currently running process".format(
                     output_song_name))
@@ -171,14 +163,14 @@ class Backend:
         ]
         processTriple = self.__start_process_from_command(cmd)
 
-        self.musicGenProcesses[process_name] = (processTriple, output_song_name)
+        self.generating_songs[process_name] = (processTriple, output_song_name)
 
-    def get_output_for_training_process(self, process_name):
+    def get_config_output(self, process_name):
         self.__cleanup()
-        if process_name not in self.trainingProcesses:
+        if process_name not in self.training_configs:
             return "(terminated)"
         else:
-            processTriple, targetConfig = self.trainingProcesses[process_name]
+            processTriple, targetConfig = self.training_configs[process_name]
             proc, q, outputbuf = processTriple
             return outputbuf
 
@@ -186,23 +178,24 @@ class Backend:
         """
         Gets the status of the system
         """
-        print self.getTrainingFiles()
-        print self.getCompletedTrainedConfigs()
-        print self.getGeneratedMusic()
-        print self.getTrainedConfigsInProgress()
-        print self.getTrainingProcessNames()
-        print self.getMusicBeingGenerated()
-        return {}
+        self.__cleanup()
+        return {
+            'music_files': self.get_music_files(),
+            'training_configs': self.get_training_configs(),
+            'trained_configs': self.get_trained_configs(),
+            'generating_songs': self.get_generating_songs(),
+            'generated_songs': self.get_generated_songs(),
+        }
 
     def get_music_gen_process_names(self, process_name):
-        return self.musicGenProcesses.keys()
+        return self.generating_songs.keys()
 
-    def get_output_for_music_gen_process(self, process_name):
+    def get_generating_song_output(self, process_name):
         self.__cleanup()
-        if process_name not in self.musicGenProcesses:
+        if process_name not in self.generating_songs:
             return "(terminated)"
         else:
-            processTriple, targetConfig = self.musicGenProcesses[process_name]
+            processTriple, targetConfig = self.generating_songs[process_name]
             proc, q, outputbuf = processTriple
             return outputbuf
 
