@@ -91,7 +91,7 @@ def train():
       #there is already training happening to a config if this name, invalid, do something
       pass
     #create the new training process
-    datamodel.startTrainingProcess(processName, 'backend/trained_configs/' + configName, datamodel.getTrainingFiles())
+    datamodel.startTrainingProcess(processName, configName, datamodel.getTrainingFiles(), 100) #100 seconds
     return redirect('/')
 
 # Generate music
