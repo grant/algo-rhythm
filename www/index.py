@@ -41,13 +41,18 @@ def get_uploaded_files():
 def home():
     #files = get_uploaded_files()
     files = datamodel.getTrainingFiles()
-    #return render_template('index.html', files=files)
     return render_template('index.html',
-      files=files,
-      trainingprocesses=datamodel.getTrainingProcessNames(),
-      trainedconfigs=datamodel.getCompletedTrainedConfigs(),
-      trainedmusic=[]
+        files=files,
+        trainingprocesses=datamodel.getTrainingProcessNames(),
+        trainedconfigs=datamodel.getCompletedTrainedConfigs(),
+        generationprocesses=[],
+        generatedmusic=[]
     )
+
+# About
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 # Upload new file
 @app.route('/upload', methods=['GET', 'POST'])

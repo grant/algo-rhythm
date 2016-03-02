@@ -1,7 +1,20 @@
 /* Global */
 
+html, body {
+  height: 100%;
+}
+
+@keyframes unhide {
+  0% {
+    overflow: hidden;
+  }
+  50% {
+    overflow: none;
+  }
+}
 html body {
   font-family: 'Open Sans', sans-serif;
+  animation: unhide 2s normal forwards ease-in-out;
 }
 
 a {
@@ -10,13 +23,36 @@ a {
 }
 
 /* Header */
-header {
+@keyframes moveUp {
+  50% {
+    height: 100%;
+  }
+  100% {
+    height: 100px;
+  }
+}
+
+.header {
   background-color: rgb(255, 89, 55);
   text-align: center;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: moveUp 2s normal forwards ease-in-out;
 }
 
 header .logo {
-  margin: 10px;
+  padding: 20px;
+}
+
+.github-fork {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+  width: 100px;
 }
 
 /* Content */

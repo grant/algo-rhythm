@@ -2,14 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Algorithm Music</title>
+  <title>Algo Rhythm</title>
   <link rel="stylesheet" href="static/css/index.css">
   <link rel="stylesheet" href="static/css/reset.css">
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800,300,300italic,400italic,600,600italic,700italic,800italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
-  <header>
-    <img src="static/img/logo.png" alt="Algorithm Music" class="logo">
+<!--   <a href="https://github.com/grant/algo-rhythm">
+    <img class="github-fork" src="static/img/github_fork.png" alt="Fork me on GitHub" />
+  </a>
+ -->
+  <header class='header'>
+    <img src="static/img/logo.svg" alt="Algo Rhythm" class="logo">
   </header>
   <div class="content">
     <div class="play-pause">
@@ -47,20 +51,19 @@
       <form action="/train" method="post" enctype="multipart/form-data" class="form">
         <li class="file">Process name:<input type="text" name="processname"></li>
         <li class="file">Config name:<input type="text" name="configname"></li>
+        <li class="file"># Iterations:<input type="text" name="iterations"></li>
         <input type="submit">
       </form>
     </div>
     <div class="trainingprocesses">
       <h1 class="title">Training Processes</h1>
-      {% for tp in trainingprocesses %}
-        <li class="file"><a href="trainingprocesses/{{ tp }}">{{ tp }}</a></li>
-      {% endfor %}
-    </div>
-    <div class="trainedconfigs">
-      <h1 class="title">Trained Configurations</h1>
-      {% for tc in trainedconfigs %}
-        <li class="file">{{ tc }}</li>
-      {% endfor %}
+      <ul>
+        {% for tp in trainingprocesses %}
+          <li class="file"><a href="trainingprocesses/{{ tp }}">{{ tp }}</a></li>
+        {% else %}
+          <li>No configs being trained</li>
+        {% endfor %}
+      </ul>
     </div>
     <div class="generatemusic">
       <h1 class="title">Generate Music</h1>
@@ -75,10 +78,20 @@
       <input type="text">
       <input type="submit" value="Generate">
     </div>
+    <div class="generationprocesses">
+      <h1 class="title">Generation Processes</h1>
+      <ul>
+        {% for tp in generationprocesses %}
+          <li class="file"><a href="generationprocesses/{{ tp }}">{{ tp }}</a></li>
+        {% else %}
+          <li>No music being generated</li>
+        {% endfor %}
+      </ul>
+    </div>
     <div class="generatedmusic">
       <h1 class="title">Generated Music</h1>
       <ul>
-        {% for tm in trainedmusic %}
+        {% for tm in generatedmusic %}
           <li>{{tm}}</li>
         {% endfor %}
       </ul>
@@ -86,6 +99,7 @@
   </div>
 
   <!-- Scripts -->
+  <script type="text/javascript" src="static/main.js"></script>
   <script type="text/javascript" src="static/midi.js"></script>
 </body>
 </html>
