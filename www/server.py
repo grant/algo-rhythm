@@ -6,15 +6,19 @@ from flask import render_template
 from flask import send_from_directory
 from werkzeug.utils import secure_filename
 
-<<<<<<< HEAD:www/index.py
-datamodel = algorythm_datamodel.AlgorythmDatamodel('../dummycode')
-=======
-backend = back.Backend()
->>>>>>> a9661f212afc916269c9fd8df8702f1eddc93cf2:www/server.py
 
-UPLOAD_FOLDER = back.UPLOAD_DIR
-CONFIG_FOLDER = back.CONFIG_DIR
-GENERATED_SONG_FOLDER = back.GENERATED_SONG_DIR
+#Move these constants here
+BACKEND_BASE = '../dummycode'
+UPLOAD_DIR = BACKEND_BASE + '/training_xml_web/'
+CONFIG_DIR = BACKEND_BASE + '/trained_configs/'
+GENERATED_SONG_DIR = BACKEND_BASE + '/generated_music/'
+SCRIPT_ROOT = BACKEND_BASE
+
+backend = back.Backend(UPLOAD_DIR, CONFIG_DIR, GENERATED_SONG_DIR, SCRIPT_ROOT)
+
+UPLOAD_FOLDER = UPLOAD_DIR
+CONFIG_FOLDER = CONFIG_DIR
+GENERATED_SONG_FOLDER = GENERATED_SONG_DIR
 ALLOWED_EXTENSIONS = {'xml'}
 
 # Setup flask
