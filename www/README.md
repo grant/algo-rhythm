@@ -5,7 +5,7 @@
 pip install Flask
 
 # Start server (will be exposed)
-sudo python index.py
+sudo python server.py
 
 # Open the site
 open http://0.0.0.0:80/

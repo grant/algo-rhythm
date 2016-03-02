@@ -2,7 +2,7 @@
   <h1 class="title">Train Configuration</h1>
   <form action="/train" method="post" enctype="multipart/form-data" class="form">
     <ul>
-      {% for file in files %}
+      {% for file in music_files %}
         <li class="file">
           <label>
             <input type="checkbox" name="file" value="{{file}}">

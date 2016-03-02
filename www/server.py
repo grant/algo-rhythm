@@ -1,18 +1,21 @@
-import algorythm_datamodel
+import backend as back
 import os
 from flask import Flask, request, redirect
 from flask import jsonify
 from flask import render_template
 from flask import send_from_directory
-from os import listdir
-from os.path import isfile, join
+from werkzeug.utils import secure_filename
 
+<<<<<<< HEAD:www/index.py
 datamodel = algorythm_datamodel.AlgorythmDatamodel('../dummycode')
+=======
+backend = back.Backend()
+>>>>>>> a9661f212afc916269c9fd8df8702f1eddc93cf2:www/server.py
 
-UPLOAD_FOLDER = datamodel.UPLOAD_DIR
-CONFIG_FOLDER = datamodel.CONFIG_DIR
-GENERATED_SONG_FOLDER = datamodel.GENERATED_SONG_DIR
-ALLOWED_EXTENSIONS = set(['xml'])
+UPLOAD_FOLDER = back.UPLOAD_DIR
+CONFIG_FOLDER = back.CONFIG_DIR
+GENERATED_SONG_FOLDER = back.GENERATED_SONG_DIR
+ALLOWED_EXTENSIONS = {'xml'}
 
 # Setup flask
 app = Flask(__name__)
@@ -27,17 +30,6 @@ if not os.path.exists(GENERATED_SONG_FOLDER):
     os.makedirs(GENERATED_SONG_FOLDER)
 
 
-# Helper methods
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-
-def get_uploaded_files():
-    path = UPLOAD_FOLDER
-    files = [{'name': f, 'url': UPLOAD_FOLDER + '/' + f} for f in listdir(path) if isfile(join(path, f))]
-    return files
-
-
 # Setup routes
 
 # Home
@@ -47,11 +39,12 @@ def home():
     # By default loads the animation
     animate = request.args.get('animate') != 'false'
 
+    status = backend.get_status()
     return render_template(
         'index.html',
         animate=animate,
-        files=datamodel.getTrainingFiles(),
-        trainingprocesses=
+        music_files=status['music_files'],
+        trainingconfigs=
         # datamodel.getTrainingProcessNames(),
         [{
             'name': 'file 3',
@@ -60,8 +53,7 @@ def home():
             'name': 'file 4',
             'progress': 10,
         }],
-        trainedconfigs=
-        datamodel.getCompletedTrainedConfigs(),
+        trainedconfigs=backend.get_trained_configs(),
         generationprocesses=[
             {
                 'name': 'file 3',
@@ -98,6 +90,10 @@ def about():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['file']
+
+    def allowed_file(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -116,15 +112,14 @@ def train():
     # Error checking
     if len(files) == 0:
         raise RuntimeError('No files checked')
-    if name in datamodel.getCompletedTrainedConfigs():
+    if name in backend.get_trained_configs():
         raise RuntimeError('Config with that name already exists')
 
     # Create the new training process
-    datamodel.startTrainingProcess(
-        newProcessName=name,
-        targetConfig=name,
-        xmlFileList=files,
-        numIterations=iterations,
+    backend.start_training_process(
+        config=name,
+        files=files,
+        iterations=iterations,
     )
     return redirect('/')
 
@@ -144,16 +139,16 @@ def view_upload(name=None):
 
 
 # View training process log
-@app.route('/trainingprocesses/<name>', methods=['GET', 'POST'])
+@app.route('/trainingconfigs/<name>', methods=['GET', 'POST'])
 def view_training_process(name=None):
     prefix = "<html><head></head><body><pre>\n"
     postfix = "</pre></body></html>"
-    return prefix + datamodel.getOutputForTrainingProcess(name) + postfix
+    return prefix + backend.get_config_output(name) + postfix
 
 
 @app.route('/status', methods=['GET'])
 def status():
-    return jsonify(**datamodel.getStatus())
+    return jsonify(**backend.get_status())
 
 
 if __name__ == '__main__':
