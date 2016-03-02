@@ -62,7 +62,7 @@ header .logo {
 
 .content {
   margin: 20px auto;
-  width: 400px;
+  width: 600px;
 }
 
 .content .title {
@@ -98,7 +98,7 @@ header .logo {
 .content input[type="file"] {
   display: none;
 }
-.content input[type="number"] {
+.content input[type="number"], .content input[type="text"] {
   height: 15px;
   padding: 5px;
 }
@@ -107,7 +107,6 @@ header .logo {
   font-style: italic;
   color: #ccc;
 }
-
 
 /* section */
 .section:not(:last-of-type) {
@@ -119,35 +118,6 @@ header .logo {
   margin: 20px 0;
   border: 1px solid #eee;
 }
-
-/* music-player */
-
-/*.music-player {
-  text-align: center;
-
-  border-bottom: 1px dashed #ddd;
-  margin-bottom: 20px;
-}
-
-.music-player .subtitle {
-  color: #ccc;
-  padding-bottom: 10px;
-}
-
-.music-player .current-song {
-  font-style: italic;
-  color: #888;
-}
-
-.music-player button {
-  padding: 10px;
-  margin: 20px;
-  overflow: hidden;
-  border: 1px dotted #eee;
-  min-width: 80px;
-  background-color: transparent;
-  cursor: pointer;
-}*/
 
 /* generated-music */
 .generated-music {
@@ -161,7 +131,37 @@ header .logo {
   padding: 10px 0;
   cursor: pointer;
 }
-.generated-music .song:not(:first-child):hover {
+.generated-music .song .icon {
+  position: relative;
+  vertical-align: top;
+}
+.generated-music .song .icon .stop {
+  font-size: 36px;
+  margin-top: -13px;
+}
+.generated-music .song .icon .play {
+  font-size: 20px;
+  margin-top: -4px;
+}
+.generated-music .song .icon .play, .generated-music .song .icon .stop {
+  text-align: center;
+  display: none;
+  position: absolute;
+  width: 100%;
+}
+.generated-music .song.playing:not(:hover):not(.none) {
+  /* Currently playing song */
+  background-color: rgb(255, 89, 55);
+}
+.generated-music .song:not(.playing):hover .icon .play {
+  /* Play a song */
+  display: block;
+}
+.generated-music .song.playing .icon .stop {
+  /* Stop playing song */
+  display: block;
+}
+.generated-music .song:not(:first-child):not(.none):hover {
   background-color: rgb(255, 209, 185);
 }
 .generated-music .song:not(:last-of-type) {

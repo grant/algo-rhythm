@@ -11,8 +11,11 @@
           <span class="cell length">Length</span>
         </li>
       {% for song in generatedmusic %}
-        <li class="song" data-id={{song.id}}>
-          <span class="cell icon"></span>
+        <li class="song" data-name="{{song.name}}">
+          <span class="cell icon">
+            <span class="play">▶</span>
+            <span class="stop">■</span>
+          </span>
           <span class="cell name">{{song.name}}</span>
           <span class="cell tempo">{{song.tempo}}</span>
           <span class="cell length">{{song.length}}</span>
