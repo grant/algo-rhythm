@@ -1,0 +1,103 @@
+Jetson TX 1 Writeup, February 1, 2016:
+
+The purpose of this document is to summarize things learned regarding setup and administration of the Jetson TX 1, as well as to document some relevant parts of its configuration for future administrators.
+
+***********Default Username/Password***************
+
+Default username/password is ubuntu/ubuntu, this is true after initial flash, and this account still exists.  Currently ssh access is disabled for this account, see more below.
+
+***********Initial Boot/Monitor Issues:****************
+
+The Jetson TX 1 connects to a monitor via an HDMI connector.  The board does not have a normal BIOS, and uses UBoot for bootloading (http://www.denx.de/wiki/U-Boot).  One consequence is that while the kernel is loading no video output is produced.  Therefore if the monitor is blank when the board is started, wait a minute or so before assuming there is a problem.
+
+Furthermore, HDMI uses a discovery protocol which is glitchy in the Jetson TX 1, and it will sometimes fail to detect older monitors.  Just know that this is the case, so if the board does not work with one monitor, probably try a different one until one is found that works.
+
+Notice that because there's a discovery protocol involved, if you first connect it to a monitor that it "likes" then reconnect it to a monitor that it won't normally boot with, it may work.  However if you reboot with that monitor the discovery will fail and the problem will still exist.
+
+This problem is known on the NVidia embedded forum (https://developer.nvidia.com/embedded-forum).  NVidia is supposed to be working on a fix, but idk if it will take the form of a driver upgrade, firmware upgrade, etc.
+
+***********Flashing the TX 1 and Installation of the Jetpack Libraries***************
+
+The TX 1 can be flashed back to factory settings.  Also the "Jetpack", a set of NVidia libraries and samples can be installed, and in fact don't come installed on the flashed image.  Therefore any time the Jetson is flashed, it is necessary to reinstall the libraries associated with Jetpack (CUDA, CUDNN, et al).
+
+The Jetpack itself is a software package that is installed and run on a different host (not the Jetson), and allows the host to connect to the Jetson via USB to do flashing and library installation.  One requirement for installing Jetpack is that the target system must be Ubuntu 14.04.  A good way to handle this is to use VirtualBox to create an Ubuntu 14.04 virtual machine.  This document will assume that that is what is being done.  Documentation exists online on how to install VirtualBox, and how to install an OS like Ubuntu 14.04 (pretty much download the iso image from the Ubuntu website and use it to boot the VM).
+
+AN IMPORTANT POINT ABOUT INITIALIZING THE NEW VIRTUAL MACHINE:
+Set the size of the virtual hard disk to something high, like 64 GB.  The Jetpack install will actually eat up a lot of space, if you run out currently VirtualBox does not support resizing and you will have to start again.
+
+ADDTIONAL IMPORTANT POINT:
+The amount of memory to allocate for the virtual machine can be changed later in the install process, so this isn't critical to get right initially, but it too should be set to reasonably large (higher than default), like 8192 MB.  If it is set too low (like the default of 512 MB) then the library install will fail, hanging indefinitely, and no error message will be displayed indicating why it hung.
+
+Once the OS install is done, it will also be desirable to install guest additions:
+http://askubuntu.com/questions/22743/how-do-i-install-guest-additions-in-a-virtualbox-vm
+Also, the virtual machine will be connecting with the Jetson TX 1 via USB, here is one of many websites that discusses making USB connections to virtual machines:
+http://www.dedoimedo.com/computers/virtualbox-usb.html
+
+To install the Jetpack, it's necessary to download the file "JetPack-L4T-2.0-linux-x64.run".  It's probably a good idea to put this in its own directory, as it will create additional files and directories.  The file can currently be downloaded here:
+https://developer.nvidia.com/embedded/downloads?#?dn=jetson-development-pack-jetpack-2-0
+Note it's necessary to register as an NVidia developer to download this file.
+
+There are two tasks that one can do with this: reflash the board, and install GPU libraries/samples.  We'll discuss the latter first.
+
+To install libraries/samples, you must have ssh access to the NVidida board from the (virtual) host running Jetpack.  Specifically, you should know the IP address of the board, and you should have the username/password of an account on the Jetson board that can be used to log in via ssh.  Finally, that account needs to have "sudo" access.
+
+To install the libraries, run the file "./JetPack-L4T-2.0-linux-x64.run"  After clicking "okay" a few times and providing a root password, you will be shown a component manager UI, where for various components you can choose "no action" or "install".  Most of this you want to install *but with one exception*--under "Post-Install", there is a component "Flash OS".  If this is chosen, then the Jetpack will try to flash the OS.  Later instructions will include how to connect the Jetson to Jetpack for flashing, but if you try to do this with this option it will fail, and the Jetson will be bricked until you flash it correctly.  So always choose "no action" for "Flash OS" on this interface.
+
+After this, accept the license, after clicking "next" a few times, you will be prompted for the IP address/username/password for the Jetson.  If you provide valid values, then the installation of CUDA/CUDNN/samples should proceed normally.  (CAUTION: If there is insufficient memory in the virtual machine, this part will hang with no explanation, so if this occurs then try increasing the VM memory.  If not enough disk space was allocated, then this part will run out of disk space, in which case there's currently no option with VirtualBox but to trash this VM and create new one, going through all the install steps again...)
+
+To flash the OS, the Jetson TX 1 must be set to recovery mode.  Also, the Jetson TX 1 comes with a us cable that connects to a host PC on the other.  This cable is required for this step.
+
+To put the Jetson TX 1 into recovery mode:
+1. Power on the board.
+2. Press and hold the "recovery" button (next to the power button)
+3. After a few seconds and still holding "recovery", press reset and continue to hold "recovery"
+4. Wait a few seconds, and release "recovery"
+
+Once the Jetson board is in recovery mode, use the USB to USB cable to connect the board to the host machine with the Jetpack install.  That everything is working as expected can be verified by the Jetson showing up as a USB periphal called "NVidia Corp" on the host.  Verify that it is visible on the virtual machine by typing "lsusb" at the prompt, there should be an entry "NVidia Corp."  If it is visible on the host and not the virtual machine, probably Google search "VirtualBox USB" for troubleshooting tips.
+
+The *wrong* way to flash (at least in my experience with this version of Jetpack) is to run "./JetPack-L4T-2.0-linux-x64.run" (previously mentioned) and select "Flash OS" as a component to install.  This will result in a failed flash that will effectively brick the Jetson until it is reflashed properly.  Instead, find the script "flash.sh" under the directory "Linux_for_Tegra_tx1".  Navigate to this directory and type the command "sudo ./flash.sh jetson-tx1 mmcblk0p1".  For the orignal source, see the page at this url: http://developer.download.nvidia.com/embedded/L4T/r23_Release_v1.0/l4t_quick_start_guide.txt  In any case, this should result in a successful flash.
+
+*****************System Administration*******************
+
+This section will explain system administration that was done (i.e., changes to default settings) and the relevant files.
+
+*The hard drive is mounted on /home.  This is specified in the file /etc/fstab.
+*The firewall is set up, but ports 22 (ssh) and 80 (http) are open.  This can be changed using iptables (here's a decent reference: https://help.ubuntu.com/community/IptablesHowTo, iptables-persistent is installed, see page for more details).
+*ssh access is disabled for the root and ubuntu accounts.  This is controlled in the file /etc/ssh/sshd_config
+*In the directory /etc/profile.d, there are two scripts, theano.sh and cuda.sh which set some environment variables relevant to Theano and CUDA respectively.
+
+If you reflash the Jetson TX 1 board, one issue is that by default there are no host keys installed, this means that ssh won't work.  Here is one page that shows how to fix this in archlinux (https://bbs.archlinux.org/viewtopic.php?id=144449) but the idea is the same across distributions, basically some key files need to be generated and placed in /etc/ssh.
+
+Currently the only user account with ssh access is "rnnmusic," which was used for doing algorithmic music composition with recurrant neural networks (Winter 2016).  This account currently also has sudo access, and was shared among the entire group.
+
+******************Swap***********************************
+
+The Jetson TX 1 board comes equipped with 4 GB of ram.  However, it does not have swap enabled by default.  Moreover, whether or not swap is enabled is a compile-time setting in the kernel build, but the kernel which is flashed on the Jetson by default does not have this built.  Therefore, if applications exhaust the 4 GB memory space, no swapping will occur and the programs will fail, which can be a problem.
+
+In order to enable swap, it is necessary to rebuild the kernel, and to do this, it is necessary to set up a cross-compilation toolchain (specifically Linaro).  Here are some relevant posts on the developer forums:
+https://devtalk.nvidia.com/default/topic/916777/jetson-tx1/configuring-swap/
+https://devtalk.nvidia.com/default/topic/914941/jetson-tx1/custom-kernel-compilations/
+Basically I wanted to do this but ran into having to provide Linaro with parameters for cross compiling to ARM that I did not have...probably I could have spent time on the Linaro/NVidia forums to figure it out, but our group was running out of time so this became less pressing...
+
+Also, on jetson2 and jetson3 there is a partition of the hard disk which is currently reserved for swap.  I configured this before I knew about the kernel issue, if swap was ever enabled (by a successful kernel cross compilation) then these partitions could be configured to be swap space by modifying /etc/fstab.
+
+******************Theano********************************
+
+For our RNN project, we used Theano, a Python deep learning framework:
+http://deeplearning.net/software/theano/
+This is installed on all three Jetsons, along with all prerequisite packages listed on the Theano website.  Other installed libraries used were midi-python and theano_lstm.  One factor that drove our decision to use Theano was that existing work in algorithmic music composition existed along with Theano source code, but both Caffe and Torch code can run on the Jetson as well, as well as just programming CUDNN directly.
+
+******************Jetson Performance Tuning*********************
+
+Jetson performance can be varied by changing the clock speed.  This can be done by reading from/writing to device files in the /sys tree as root or under sudo.  For more details, see this forum post:
+https://devtalk.nvidia.com/default/topic/901337/cuda-7-0-jetson-tx1-performance-and-benchmarks/
+and this wiki page:
+http://elinux.org/Jetson/Performance
+
+******************NVidia Embedded Forums*********************
+
+The forums were very helpful:
+https://devtalk.nvidia.com/default/board/164/jetson-tx1/
+Any problems, just post here
+
+
