@@ -41,7 +41,6 @@ def home():
         animate=animate,
         music_files=status['music_files'],
         trainingconfigs=
-        # datamodel.getTrainingProcessNames(),
         [{
             'name': 'file 3',
             'progress': 50,
@@ -117,29 +116,35 @@ def train():
         files=files,
         iterations=iterations,
     )
-    return redirect('/')
+    return redirect('/?animate=false')
 
 
 # Generate music
 @app.route('/generate', methods=['POST'])
 def generate_music():
-    # error handling....
-    # datamodel.startMusicProcess(processName, configName, seconds, 'backend/trained_music/' + configName)
-    return redirect('/')
+    config_file = request.form['config']
+    length = request.form['length']
+    name = request.form['name']
+
+    # Error checking
+    for field in [config_file, length, name]:
+        if field is None:
+            raise RuntimeError('Field is missing')
+
+    # Create the new generation process
+    backend.start_music_generation_process(
+        trained_config=config_file,
+        song_name=name,
+        song_length=length,
+    )
+
+    return redirect('/?animate=false')
 
 
 # View uploaded file
 @app.route('/uploads/<name>', methods=['GET', 'POST'])
 def view_upload(name=None):
     return send_from_directory(UPLOAD_FOLDER, name)
-
-
-# View training process log
-@app.route('/trainingconfigs/<name>', methods=['GET', 'POST'])
-def view_training_process(name=None):
-    prefix = "<html><head></head><body><pre>\n"
-    postfix = "</pre></body></html>"
-    return prefix + backend.get_config_output(name) + postfix
 
 
 @app.route('/status', methods=['GET'])
