@@ -73,7 +73,7 @@ def train():
     processName = None
     configName = None
     for key in f.keys():
-      print "Looking at key {}".format(key)
+      #print "Looking at key {}".format(key)
       if key == 'configname':
         l = f.getlist(key)
         if l:
@@ -96,7 +96,7 @@ def train():
       #there is already training happening to a config if this name, invalid, do something
       pass
     #create the new training process
-    datamodel.startTrainingProcess(processName, 'backend/trained_configs/' + configName)
+    datamodel.startTrainingProcess(processName, configName, datamodel.getTrainingFiles(), 100) #100 seconds
     return redirect('/')
 
 # Generate music
