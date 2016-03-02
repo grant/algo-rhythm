@@ -1,31 +1,42 @@
 import sys, time, os
 from time import sleep
 
-if len(sys.argv) < 2:
-  print "Need argument specifying output file"
+if len(sys.argv) != 3:
+  print "Need argument specifying output file, and a single argument with a list of training files"
   exit(1)
 
-if len(sys.argv) > 3:
-  print "No more than two arguments allowed"
-  exit(1)
+#if len(sys.argv) > 3:
+#  print "No more than two arguments allowed"
+#  exit(1)
 
 outfile = sys.argv[1]
 if os.path.isfile(outfile):
   print "file {} already exists.".format(outfile)
   exit(1)
 
-#user can provide a previous training
-#config to continue from
-previousConfig = None
-if len(sys.argv) == 3:
-  previousConfig = sys.argv[2]
-  if not os.path.isfile(previousConfig):
-    print "file {} doesn't exist, but it should".format(previousConfig)
+xmlfiles = sys.argv[2].split()
+
+for xmlfile in xmlfiles:
+  if not os.path.isfile(xmlfile):
+    print "xml file {} does not exist.".format(xmlfile)
     exit(1)
 
+for xmlfile in xmlfiles:
+  print "Loading XML file {}".format(xmlfile)
+  sleep(1)
+
+#user can provide a previous training
+#config to continue from
+#previousConfig = None
+#if len(sys.argv) == 3:
+#  previousConfig = sys.argv[2]
+#  if not os.path.isfile(previousConfig):
+#    print "file {} doesn't exist, but it should".format(previousConfig)
+#    exit(1)
+
 #load config here...
-if previousConfig != None:
-  print "Using initial config {}".format(previousConfig)
+#if previousConfig != None:
+#  print "Using initial config {}".format(previousConfig)
 
 print "Starting training..."
 sys.stdout.flush()

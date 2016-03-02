@@ -17,7 +17,19 @@ class AlgorythmDatamodel:
     for trainingProcess in self.trainingProcesses.keys():
       proc, targetconfig, q, output = self.trainingProcesses[trainingProcess]
       if not proc.poll() is None:
+        print "Detected process {} died.".format(trainingProcess)
         torem.add(trainingProcess)
+
+        ##DEBUG##
+        print "Reading process output"
+        try:  line = q.get_nowait() # or q.get(timeout=.1)
+        except Empty:
+          #nothing to read
+          pass
+        else:
+          print "Output from dead process: " + line
+
+
       else:
         #read stdout and append to "output"
         try:  line = q.get_nowait() # or q.get(timeout=.1)
@@ -25,10 +37,12 @@ class AlgorythmDatamodel:
           #nothing to read
           pass
         else:
+          print "Process output: " + line
           output = output + line
         self.trainingProcesses[trainingProcess] = (proc, targetconfig, q, output)
     for tp in torem:
-      del self.trainingProcesses[tp]
+      pass
+      #del self.trainingProcesses[tp]
 
   def __getFilesInDir(self, thedir):
     self.__cleanup()
@@ -57,8 +71,10 @@ class AlgorythmDatamodel:
     self.__cleanup()
     return self.trainingProcesses.keys()
 
-  def startTrainingProcess(self, newProcessName, targetConfig, startConfig = None):
+  def startTrainingProcess(self, newProcessName, targetConfig, xmlFileList, startConfig = None):
     self.__cleanup()
+    if startConfig != None:
+      raise ValueError("Start config not supported yet")
     if newProcessName == None:
       raise ValueError("got None as process name")
     if newProcessName in self.trainingProcesses.keys():
@@ -67,16 +83,19 @@ class AlgorythmDatamodel:
       raise ValueError("target config name {} is already an existing config".format(targetConfig))
     if targetConfig in self.getTrainedConfigsInProgress():
       raise ValueError("target config name {} is already in use by currently running process".format(targetConfig))
-    cmd = ['python', 'train.py', targetConfig]
+#    cmd = ['python', 'train.py', targetConfig]
+
     #if startConfig == None:
     #  cmd = ['python train.py {}'.format(targetConfig)
     #else:
-    if startConfig != None:
-      if startConfig in getTrainedConfigs:
-        cmd.append(startConfig)
-      else:
-        raise ValueError('start config is not a valid config')
+#    if startConfig != None:
+#      if startConfig in getTrainedConfigs:
+#        cmd.append(startConfig)
+#      else:
+#        raise ValueError('start config is not a valid config')
     #cmd = 'python backend/train.py {} {}'.format(targetConfig, startConfig)
+
+    cmd = ['python', 'train.py', targetConfig, ' '.join(['backend/music_uploads/' + xmlfile for xmlfile in xmlFileList])]
 
     def enqueue_output(out, queue):
       for line in iter(out.readline, b''):
