@@ -1,8 +1,19 @@
-<div class="generatedmusic">
-  <h1 class="title">Generated Music</h1>
-  <ul>
-    {% for tm in generatedmusic %}
-      <li>{{tm}}</li>
+<div class="generated-music">
+  <h1 class="title">Generated Songs</h1>
+  <ul class="song-list">
+      <li class="song header">
+        <span class="cell icon"></span>
+        <span class="cell name">Song Name</span>
+        <span class="cell tempo">Tempo</span>
+        <span class="cell length">Length</span>
+      </li>
+    {% for song in generatedmusic %}
+      <li class="song" data-id={{song.id}}>
+        <span class="cell icon"></span>
+        <span class="cell name">{{song.name}}</span>
+        <span class="cell tempo">{{song.tempo}}</span>
+        <span class="cell length">{{song.length}}</span>
+      </li>
     {% endfor %}
   </ul>
 </div>

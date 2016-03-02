@@ -1,8 +1,12 @@
-<div class="generationprocesses">
+{% import 'macros/progress_bar_macro.html' as progress_bar %}
+
+<div class="generation-processes">
   <h1 class="title">Generation Processes</h1>
   <ul>
-    {% for tp in generationprocesses %}
-      <li class="file"><a href="generationprocesses/{{ tp }}">{{ tp }}</a></li>
+    {% for song in generationprocesses %}
+      <li class="song">
+        {{ progress_bar.progress_bar(song.name, song.progress) }}
+      </li>
     {% else %}
       <li>No music being generated</li>
     {% endfor %}

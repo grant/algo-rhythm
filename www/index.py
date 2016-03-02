@@ -45,8 +45,26 @@ def home():
         files=files,
         trainingprocesses=datamodel.getTrainingProcessNames(),
         trainedconfigs=datamodel.getCompletedTrainedConfigs(),
-        generationprocesses=[],
-        generatedmusic=[]
+        generationprocesses=[{
+          'name': 'file 3',
+          'progress': 50,
+        }, {
+          'name': 'file 4',
+          'progress': 10,
+        }],
+        generatedmusic=[{
+          'name': 'file name 1',
+          'tempo': 128,
+          'length': '3:02',
+        }, {
+          'name': 'file name 1',
+          'tempo': 128,
+          'length': '3:02',
+        }, {
+          'name': 'file name 1',
+          'tempo': 128,
+          'length': '3:02',
+        }]
     )
 
 # About
