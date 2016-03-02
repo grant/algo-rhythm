@@ -19,21 +19,28 @@ if __name__ == '__main__':
   numseconds = int(sys.argv[3])
 
   print "{}: Loading model from file {}".format(time.strftime("%c"), paramfile)
+  sys.stdout.flush()
   sleep(4)
 
   slices_to_generate = 8 * numseconds
 
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
+  sys.stdout.flush()
   sleep(1)
   print "Still generating music..."
+  sys.stdout.flush()
   sleep(1)
   print "Still generating music... (2)"
+  sys.stdout.flush()
   sleep(1)
   print "Still generating music... (3)"
+  sys.stdout.flush()
   sleep(1)
   print "Still generating music... (4)"
+  sys.stdout.flush()
   sleep(1)
   print "Done generating music, writing out..."
+  sys.stdout.flush()
 
 
 
@@ -89,4 +96,5 @@ if __name__ == '__main__':
 
 
   print "Written out!!"
+  sys.stdout.flush()
 

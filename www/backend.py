@@ -7,9 +7,13 @@ UPLOAD_DIR = 'backend/music_uploads/'
 CONFIG_DIR = 'backend/trained_configs/'
 GENERATED_SONG_DIR = 'backend/generated_music/'
 
-
 class Backend:
-    def __init__(self):
+
+    def __init__(self, upload_dir, config_dir, generated_song_dir, scriptroot):
+        self.upload_dir = upload_dir
+        self.config_dir = config_dir
+        self.generated_song_dir = generated_song_dir
+        self.scriptroot = scriptroot
         self.training_configs = {}
         self.generating_songs = {}
 
@@ -64,15 +68,15 @@ class Backend:
 
     def get_music_files(self):
         self.__cleanup()
-        return os.listdir(UPLOAD_DIR)
+        return os.listdir(self.upload_dir)
 
     def get_trained_configs(self):
         self.__cleanup()
-        return os.listdir(CONFIG_DIR)
+        return os.listdir(self.config_dir)
 
     def get_generated_songs(self):
         self.__cleanup()
-        return os.listdir(GENERATED_SONG_DIR)
+        return os.listdir(self.generated_song_dir)
 
     def get_training_configs(self):
         self.__cleanup()
@@ -134,9 +138,9 @@ class Backend:
 
         cmd = [
             'python',
-            'train_dummy.py',
-            CONFIG_DIR + config,
-            ' '.join([UPLOAD_DIR + xmlfile for xmlfile in files]),
+            'train.py',
+            self.config_dir + config,
+            ' '.join([self.upload_dir + xmlfile for xmlfile in files]),
             str(iterations)
         ]
         print ' '.join(cmd)
@@ -163,10 +167,9 @@ class Backend:
 
         cmd = [
             'python',
-            'genmusic_dummy.py',
-            CONFIG_DIR + trained_config,
-            GENERATED_SONG_DIR + song_name,
-            str(song_length)
+            'genmusic.py',
+            self.config_dir + trained_config,
+            self.generated_song_dir + song_name, str(song_length)
         ]
 
         self.generating_songs[process_name] = (self.__start_process(cmd), song_name)

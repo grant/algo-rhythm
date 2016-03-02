@@ -1,7 +1,7 @@
 import sys, time, os
 from time import sleep
 
-print "Argv: {}".format(sys.argv)
+#print "Argv: {}".format(sys.argv)
 
 if len(sys.argv) != 4:
   print "Need 3 arguments, one specifying output file, a single argument with a list of training files, and a number of training iterations"
@@ -25,6 +25,7 @@ for xmlfile in xmlfiles:
 
 for xmlfile in xmlfiles:
   print "Loading XML file {}".format(xmlfile)
+  sys.stdout.flush()
   sleep(1)
 
 numiterations = int(sys.argv[3])

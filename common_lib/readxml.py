@@ -521,14 +521,6 @@ def midiForXML(xmlFile, midiDestFile):
     midi_to_statematrix.noteStateMatrixToMidi(stateMatrix, name=midiDestFile)
     return 0    
 
-if __name__ == "__main__":
-  stateMatrices = createStateMatrices()
-  print "{0} songs total.".format(len(stateMatrices))
-  #print "Pwd: " + os.getcwd()
-  for k in stateMatrices.keys():
-    midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1], name='./midi_output_test/{}'.format(k))
-    
-
 
 #NO LONGER USED!!!!
 def createStateMatrices_old():
@@ -607,4 +599,11 @@ def createStateMatrices_old():
 
   return stateMatrices
 
+if __name__ == "__main__":
+  stateMatrices = createStateMatrices()
+  print "{0} songs total.".format(len(stateMatrices))
+  #print "Pwd: " + os.getcwd()
+  for k in stateMatrices.keys():
+    midi_to_statematrix.noteStateMatrixToMidi(stateMatrices[k][1], name='./midi_output_test/{}'.format(k))
+    
 
