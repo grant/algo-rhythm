@@ -70,13 +70,59 @@ header .logo {
   font-size: 20px;
   text-transform: uppercase;
   font-weight: 100;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
   color: #ccc;
+}
+.content .subtitle {
+  font-size: 16px;
+  text-transform: uppercase;
+  font-weight: 100;
+  padding: 8px 0;
+  color: #ccc;
+}
+
+.content input[type="submit"], .button {
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background-color: rgb(255, 89, 55);
+  cursor: pointer;
+  line-height: 1.3;
+}
+.content input[type="submit"]:hover {
+  background-color: rgb(255, 129, 95);
+}
+.content input[type="file"] {
+  display: none;
+}
+.content input[type="number"] {
+  height: 15px;
+  padding: 5px;
+}
+
+.none {
+  font-style: italic;
+  color: #ccc;
+}
+
+
+/* section */
+.section:not(:last-of-type) {
+  padding-bottom: 20px;
+}
+
+.group {
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #eee;
 }
 
 /* music-player */
 
-.music-player {
+/*.music-player {
   text-align: center;
 
   border-bottom: 1px dashed #ddd;
@@ -101,20 +147,19 @@ header .logo {
   min-width: 80px;
   background-color: transparent;
   cursor: pointer;
-}
+}*/
 
 /* generated-music */
 .generated-music {
 }
-.generated-music .song-list {
-  padding: 0 0 20px 0;
+.generated-music .song:not(.none) {
+  font-size: 0;
+  background-color: #fff;
 }
 .generated-music .song {
   width: 100%;
-  font-size: 0;
   padding: 10px 0;
   cursor: pointer;
-  background-color: #fff;
 }
 .generated-music .song:not(:first-child):hover {
   background-color: rgb(255, 209, 185);
@@ -122,7 +167,7 @@ header .logo {
 .generated-music .song:not(:last-of-type) {
   border-bottom: 1px solid #eee;
 }
-.generated-music .song:nth-child(2n) {
+.generated-music .song:nth-child(2n):not(.none) {
   background-color: #eee;
 }
 .generated-music .song.header {
@@ -149,8 +194,9 @@ header .logo {
   width: 20%;
 }
 
-/* generation-processes */
-.generation-processes .song {
+/* song-generation-processes */
+/* training-processes */
+.song-generation-processes .song, .training-processes .config {
   margin: 10px 0;
 }
 
@@ -182,13 +228,11 @@ header .logo {
   color: #fff;
 }
 
-.uploads .file {
-  margin: 20px;
-  font-size: 20px;
-  color: #bbb;
-}
+/* upload */
 
 .upload .form {
-  padding: 10px 0;
   text-align: center;
+}
+.upload .button {
+  display: inline-block;
 }

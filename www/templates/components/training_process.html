@@ -1,10 +1,14 @@
-<div class="trainingprocesses">
-  <h1 class="title">Training Processes</h1>
+{% import 'macros/progress_bar_macro.html' as progress_bar %}
+
+<section class="section training-processes">
+  <h1 class="title">Configs Being Generated</h1>
   <ul>
-    {% for tp in trainingprocesses %}
-      <li class="file"><a href="trainingprocesses/{{ tp }}">{{ tp }}</a></li>
+    {% for config in trainingprocesses %}
+      <li class="config">
+        {{ progress_bar.progress_bar(config.name, config.progress) }}
+      </li>
     {% else %}
-      <li>No configs being trained</li>
+      <li class="config none">No configs being trained</li>
     {% endfor %}
   </ul>
-</div>
+</section>

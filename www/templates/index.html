@@ -14,12 +14,17 @@
   <div class="content">
     <!-- {% include 'components/music_player.html' %} -->
     {% include 'components/generated_music.html' %}
-    {% include 'components/generation_process.html' %}
-    {% include 'components/generate_music.html' %}
-    {% include 'components/training_process.html' %}
-    {% include 'components/train.html' %}
-    {% include 'components/uploads.html' %}
-    {% include 'components/upload.html' %}
+    <section class="section group song-generation">
+      {% include 'components/song_generation_processes.html' %}
+      {% include 'components/generate_music.html' %}
+    </section>
+    <section class="section group training">
+      {% include 'components/training_process.html' %}
+      {% include 'components/train_config.html' %}
+    </section>
+    <section class="section group uploading">
+      {% include 'components/upload.html' %}
+    </section>
   </div>
 
   <!-- Scripts -->

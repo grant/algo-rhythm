@@ -1,19 +1,23 @@
-<div class="generated-music">
+<section class="section generated-music">
   <h1 class="title">Generated Songs</h1>
-  <ul class="song-list">
-      <li class="song header">
-        <span class="cell icon"></span>
-        <span class="cell name">Song Name</span>
-        <span class="cell tempo">Tempo</span>
-        <span class="cell length">Length</span>
-      </li>
-    {% for song in generatedmusic %}
-      <li class="song" data-id={{song.id}}>
-        <span class="cell icon"></span>
-        <span class="cell name">{{song.name}}</span>
-        <span class="cell tempo">{{song.tempo}}</span>
-        <span class="cell length">{{song.length}}</span>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+  {% if generatedmusic|length == 0 %}
+    <div class="song none">No songs have been generated yet.</div>
+  {% else %}
+    <ul class="song-list">
+        <li class="song header">
+          <span class="cell icon"></span>
+          <span class="cell name">Song Name</span>
+          <span class="cell tempo">Tempo</span>
+          <span class="cell length">Length</span>
+        </li>
+      {% for song in generatedmusic %}
+        <li class="song" data-id={{song.id}}>
+          <span class="cell icon"></span>
+          <span class="cell name">{{song.name}}</span>
+          <span class="cell tempo">{{song.tempo}}</span>
+          <span class="cell length">{{song.length}}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>

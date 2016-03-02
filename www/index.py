@@ -40,19 +40,30 @@ def get_uploaded_files():
 @app.route('/')
 def home():
     #files = get_uploaded_files()
-    files = datamodel.getTrainingFiles()
     return render_template('index.html',
-        files=files,
-        trainingprocesses=datamodel.getTrainingProcessNames(),
-        trainedconfigs=datamodel.getCompletedTrainedConfigs(),
-        generationprocesses=[{
+        files=datamodel.getTrainingFiles(),
+        trainingprocesses=
+        # datamodel.getTrainingProcessNames(),
+        [{
           'name': 'file 3',
           'progress': 50,
         }, {
           'name': 'file 4',
           'progress': 10,
         }],
-        generatedmusic=[{
+        trainedconfigs=
+        datamodel.getCompletedTrainedConfigs(),
+        generationprocesses=[
+        {
+          'name': 'file 3',
+          'progress': 50,
+        }, {
+          'name': 'file 4',
+          'progress': 10,
+        }
+        ],
+        generatedmusic=
+        [{
           'name': 'file name 1',
           'tempo': 128,
           'length': '3:02',
