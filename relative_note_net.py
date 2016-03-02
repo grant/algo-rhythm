@@ -239,7 +239,7 @@ if __name__ == '__main__':
     else:
         net = MLP(40, 40, [256, 256], bool(sys.argv[1]))
         #lists = get_note_lists('midisamples_raw/')
-        lists = get_note_lists_XML('musicxml/', sys.argv[1])
+        lists = get_note_lists_XML('musicxml/', bool(sys.argv[1]))
         train_note_list_net(net, lists)
 
 
