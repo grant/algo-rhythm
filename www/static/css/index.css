@@ -1,7 +1,20 @@
 /* Global */
 
+html, body {
+  height: 100%;
+}
+
+@keyframes unhide {
+  0% {
+    overflow: hidden;
+  }
+  50% {
+    overflow: none;
+  }
+}
 html body {
   font-family: 'Open Sans', sans-serif;
+  animation: unhide 2s normal forwards ease-in-out;
 }
 
 a {
@@ -10,65 +23,219 @@ a {
 }
 
 /* Header */
-header {
+@keyframes moveUp {
+  50% {
+    height: 100%;
+  }
+  100% {
+    height: 100px;
+  }
+}
+
+body > .header {
   background-color: rgb(255, 89, 55);
   text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100px;
+}
+/* onload animation */
+body.animate > .header {
+  height: 100%;
+  animation: moveUp 2s normal forwards ease-in-out;
 }
 
 header .logo {
-  margin: 10px;
+  padding: 20px;
+}
+
+.github-fork {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 0;
+  width: 100px;
 }
 
 /* Content */
 
 .content {
   margin: 20px auto;
-  width: 400px;
+  width: 600px;
 }
 
 .content .title {
   text-align: center;
-  font-size: 40px;
+  font-size: 20px;
   text-transform: uppercase;
   font-weight: 100;
-  padding-bottom: 20px;
-  color: #ccc;
-}
-
-.play-pause {
-  text-align: center;
-
-  border-bottom: 1px dashed #ddd;
-  margin-bottom: 20px;
-}
-
-.play-pause .subtitle {
-  color: #ccc;
   padding-bottom: 10px;
+  color: #ccc;
+}
+.content .subtitle {
+  font-size: 16px;
+  text-transform: uppercase;
+  font-weight: 100;
+  padding: 8px 0;
+  color: #ccc;
 }
 
-.play-pause .current-song {
-  font-style: italic;
-  color: #888;
-}
-
-.play-pause button {
-  padding: 10px;
-  margin: 20px;
-  overflow: hidden;
-  border: 1px dotted #eee;
-  min-width: 80px;
-  background-color: transparent;
+.content input, .content label {
   cursor: pointer;
 }
-
-.uploads .file {
-  margin: 20px;
-  font-size: 20px;
-  color: #bbb;
+.content input[type="submit"], .button {
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background-color: rgb(255, 89, 55);
+  line-height: 1.3;
+}
+.content input[type="submit"]:hover {
+  background-color: rgb(255, 129, 95);
+}
+.content input[type="file"] {
+  display: none;
+}
+.content input[type="number"], .content input[type="text"] {
+  height: 15px;
+  padding: 5px;
 }
 
-.upload .form {
+.none {
+  font-style: italic;
+  color: #ccc;
+}
+
+/* section */
+.section:not(:last-of-type) {
+  padding-bottom: 20px;
+}
+
+.group {
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #eee;
+}
+
+/* generated-music */
+.generated-music {
+}
+.generated-music .song:not(.none) {
+  font-size: 0;
+  background-color: #fff;
+}
+.generated-music .song {
+  width: 100%;
   padding: 10px 0;
+  cursor: pointer;
+}
+.generated-music .song .icon {
+  position: relative;
+  vertical-align: top;
+}
+.generated-music .song .icon .stop {
+  font-size: 36px;
+  margin-top: -13px;
+}
+.generated-music .song .icon .play {
+  font-size: 20px;
+  margin-top: -4px;
+}
+.generated-music .song .icon .play, .generated-music .song .icon .stop {
   text-align: center;
+  display: none;
+  position: absolute;
+  width: 100%;
+}
+.generated-music .song.playing:not(:hover):not(.none) {
+  /* Currently playing song */
+  background-color: rgb(255, 89, 55);
+}
+.generated-music .song:not(.playing):hover .icon .play {
+  /* Play a song */
+  display: block;
+}
+.generated-music .song.playing .icon .stop {
+  /* Stop playing song */
+  display: block;
+}
+.generated-music .song:not(:first-child):not(.none):hover {
+  background-color: rgb(255, 209, 185);
+}
+.generated-music .song:not(:last-of-type) {
+  border-bottom: 1px solid #eee;
+}
+.generated-music .song:nth-child(2n):not(.none) {
+  background-color: #eee;
+}
+.generated-music .song.header {
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #ccc;
+}
+.generated-music .cell{
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+.generated-music .icon {
+  width: 10%;
+}
+.generated-music .name {
+  width: 50%;
+}
+.generated-music .tempo {
+  width: 20%;
+}
+.generated-music .length {
+  width: 20%;
+}
+
+/* song-generation-processes */
+/* training-processes */
+.song-generation-processes .song, .training-processes .config {
+  margin: 10px 0;
+}
+
+/* progress-bar */
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #ddd;
+}
+.progress-bar .name, .progress-bar .bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.progress-bar .bar {
+  background-color: rgb(255, 89, 55);
+  height: 100%;
+  z-index: 100;
+}
+.progress-bar .name {
+  z-index: 200;
+  font-size: 12px;
+  font-weight: 100;
+  padding: 4px 10px;
+  color: #fff;
+}
+
+/* upload */
+
+.upload .form {
+  text-align: center;
+}
+.upload .button {
+  display: inline-block;
 }

@@ -1,13 +1,11 @@
 # Custom ignore
 musicxml/midi
 net_output/
+www/backend/trained_configs/
+www/backend/music_uploads/
+
 .DS_Store
-
-
-
-
-
-
+.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

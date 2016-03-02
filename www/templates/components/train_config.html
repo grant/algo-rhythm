@@ -1,0 +1,22 @@
+<section class="section train-config">
+  <h1 class="title">Train Configuration</h1>
+  <form action="/train" method="post" enctype="multipart/form-data" class="form">
+    <ul>
+      {% for file in files %}
+        <li class="file">
+          <label>
+            <input type="checkbox" name="file" value="{{file}}">
+            {{file}}
+          </label>
+        </li>
+      {% else %}
+        <li class="file none">No file to choose from</li>
+      {% endfor %}
+    </ul>
+    <h3 class="subtitle">Number of Iterations</h3>
+    <input type="number" name="iterations" required="true" min="1" max="9999">
+    <h3 class="subtitle">Config Name</h3>
+    <input type="text" name="name" required="true">
+    <input type="submit" value="Generate Config">
+  </form>
+</section>

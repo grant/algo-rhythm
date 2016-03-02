@@ -1,0 +1,14 @@
+{% import 'macros/progress_bar_macro.html' as progress_bar %}
+
+<section class="section song-generation-processes">
+  <h1 class="title">Songs Being Generated</h1>
+  <ul>
+    {% for song in generationprocesses %}
+      <li class="song">
+        {{ progress_bar.progress_bar(song.name, song.progress) }}
+      </li>
+    {% else %}
+      <li class="song none">No music being generated</li>
+    {% endfor %}
+  </ul>
+</section>

@@ -1,0 +1,6 @@
+{% macro progress_bar(name, progress) %}
+<div class="progress-bar">
+  <div class="name">{{name}}</div>
+  <div class="bar" style="width: {{progress}}%"></div>
+</div>
+{% endmacro %}
