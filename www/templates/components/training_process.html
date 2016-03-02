@@ -1,0 +1,10 @@
+<div class="trainingprocesses">
+  <h1 class="title">Training Processes</h1>
+  <ul>
+    {% for tp in trainingprocesses %}
+      <li class="file"><a href="trainingprocesses/{{ tp }}">{{ tp }}</a></li>
+    {% else %}
+      <li>No configs being trained</li>
+    {% endfor %}
+  </ul>
+</div>

@@ -8,100 +8,23 @@
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800,300,300italic,400italic,600,600italic,700italic,800italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
-<!--   <a href="https://github.com/grant/algo-rhythm">
-    <img class="github-fork" src="static/img/github_fork.png" alt="Fork me on GitHub" />
-  </a>
- -->
   <header class='header'>
     <img src="static/img/logo.svg" alt="Algo Rhythm" class="logo">
   </header>
   <div class="content">
-    <div class="play-pause">
-      <h3 class="now-playing subtitle">Now playing...</h3>
-      <h1 class="current-song title">Bach</h1>
-      <a href="#" onClick="MIDIjs.play('static/bethlehem_du_kleine_stadt.xml.mid');">
-        <button class="play">
-          <img src="static/img/play.png" alt="Play">
-        </button>
-      </a>
-      <a href="#" onClick="MIDIjs.stop();">
-        <button class="pause">
-          <img src="static/img/pause.png" alt="Pause">
-        </button>
-      </a>
-    </div>
-    <div class="uploads">
-      <h1 class="title">Uploaded files</h1>
-      {% for file in files %}
-        <!--
-        <li class="file"><a href="{{ file.url }}">{{ file.name }}</a></li>
-        -->
-        <li class="file">{{ file }}</li>
-      {% endfor %}
-    </div>
-    <div class="upload">
-      <h1 class="title">Upload MusicXML</h1>
-      <form action="/upload" method="post" enctype="multipart/form-data" class="form">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
-      </form>
-    </div>
-    <div class="train">
-      <h1 class="title">Train Configuration</h1>
-      <form action="/train" method="post" enctype="multipart/form-data" class="form">
-        <li class="file">Process name:<input type="text" name="processname"></li>
-        <li class="file">Config name:<input type="text" name="configname"></li>
-        <li class="file"># Iterations:<input type="text" name="iterations"></li>
-        <input type="submit">
-      </form>
-    </div>
-    <div class="trainingprocesses">
-      <h1 class="title">Training Processes</h1>
-      <ul>
-        {% for tp in trainingprocesses %}
-          <li class="file"><a href="trainingprocesses/{{ tp }}">{{ tp }}</a></li>
-        {% else %}
-          <li>No configs being trained</li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="generatemusic">
-      <h1 class="title">Generate Music</h1>
-      <ul>
-        {% for tc in trainedconfigs %}
-          <li>
-            <input type="radio" id={{tc}}> <label for="cbox" + {{tc}}>{{tc}}</label>
-          </li>
-        {% endfor %}
-      </ul>
-      <h2>Number of seconds</h2>
-      <input type="text">
-      <input type="submit" value="Generate">
-    </div>
-    <div class="generationprocesses">
-      <h1 class="title">Generation Processes</h1>
-      <ul>
-        {% for tp in generationprocesses %}
-          <li class="file"><a href="generationprocesses/{{ tp }}">{{ tp }}</a></li>
-        {% else %}
-          <li>No music being generated</li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="generatedmusic">
-      <h1 class="title">Generated Music</h1>
-      <ul>
-        {% for tm in generatedmusic %}
-          <li>{{tm}}</li>
-        {% endfor %}
-      </ul>
-    </div>
+    {% include 'components/music_player.html' %}
+    {% include 'components/generated_music.html' %}
+    {% include 'components/generation_process.html' %}
+    {% include 'components/generate_music.html' %}
+    {% include 'components/training_process.html' %}
+    {% include 'components/train.html' %}
+    {% include 'components/uploads.html' %}
+    {% include 'components/upload.html' %}
   </div>
 
   <!-- Scripts -->
-  <script type="text/javascript" src="static/main.js"></script>
-  <script type="text/javascript" src="static/midi.js"></script>
+  <script type="text/javascript" src="static/js/jquery.js"></script>
+  <script type="text/javascript" src="static/js/midi.js"></script>
+  <script type="text/javascript" src="static/js/main.js"></script>
 </body>
 </html>
-
-

@@ -1,0 +1,10 @@
+<div class="generationprocesses">
+  <h1 class="title">Generation Processes</h1>
+  <ul>
+    {% for tp in generationprocesses %}
+      <li class="file"><a href="generationprocesses/{{ tp }}">{{ tp }}</a></li>
+    {% else %}
+      <li>No music being generated</li>
+    {% endfor %}
+  </ul>
+</div>
