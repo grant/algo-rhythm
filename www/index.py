@@ -7,7 +7,7 @@ from flask import send_from_directory
 from os import listdir
 from os.path import isfile, join
 
-datamodel = algorythm_datamodel.AlgorythmDatamodel()
+datamodel = algorythm_datamodel.AlgorythmDatamodel('../dummycode')
 
 UPLOAD_FOLDER = datamodel.UPLOAD_DIR
 CONFIG_FOLDER = datamodel.CONFIG_DIR
