@@ -119,23 +119,23 @@ def note_list_to_midi(notes, tickscale = 1):
     return track
 
 #returns one note list for each track in the file
-def note_lists_for_file(filename):
+def note_lists_for_file(filename, absolute=False):
     retval = []
     pattern = midi.read_midifile(filename)
     for track in pattern:
-        l = midi_to_note_list(track)
+        l = midi_to_note_list(track, absolute)
         if len(l):
             retval.append(l)
     return retval
 
-def get_note_lists(path):
+def get_note_lists(path, absolute=False):
     """
     Extract RelativeNote lists from all midi files in a folder.
     """
     lists = []
     for f in os.listdir(path):
         if f.endswith('.mid'):
-            lists.extend(note_lists_for_file(path + f))
+            lists.append(note_lists_for_file(path + f, absolute))
     return lists
 
 def get_notelist_for_xml(filename, absolute=False):
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print 'Usage: python relative_note_net.py [boolean]'
     else:
-        net = MLP(40, 40, [256, 256], bool(sys.argv[1]))
+        net = MLP(40, 40, [256, 256], True)
         #lists = get_note_lists('midisamples_raw/')
         lists = get_note_lists_XML('musicxml/', bool(sys.argv[1]))
         train_note_list_net(net, lists)
