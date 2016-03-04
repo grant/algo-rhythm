@@ -3,203 +3,268 @@ import os
 import subprocess
 from Queue import Queue, Empty
 
-class Backend:
 
-    def __init__(self, upload_dir, config_dir, generated_song_dir, scriptroot):
-        self.upload_dir = upload_dir
-        self.config_dir = config_dir
-        self.generated_song_dir = generated_song_dir
-        self.scriptroot = scriptroot
-        self.training_configs = {}
-        self.generating_songs = {}
-
-    def __check_process_triple(self, processTriple):
+def start_process(cmd, stdouthandler, deathhandler):
         """
-        takes a (process, queue, buffer) triple, removes
-        all stdout/stderr and places in buffer, returns
-        (boolean, triple) pair, where boolean is true
-        iff process is still alive, and triple is
-        a replacement triple with an updated output
-        buffer
-        """
-
-        proc, q, outputbuf = processTriple
-        # read stdout and append to "output"
-        try:
-            line = q.get_nowait()  # or q.get(timeout=.1)
-        except Empty:
-            # nothing to read
-            pass
-        else:
-            # print "Process output: " + line
-            print line
-            outputbuf = outputbuf + line
-        # According to docs, this is the process died condition
-        processDied = not proc.poll() is None
-        if processDied:
-            print "Process died..."
-        return not processDied, (proc, q, outputbuf)
-
-    def __cleanup(self):
-        dead = set()
-        for trainingProcess in self.training_configs.keys():
-            triple, targetConfig = self.training_configs[trainingProcess]
-            stillAlive, triple = self.__check_process_triple(triple)
-            self.training_configs[trainingProcess] = (triple, targetConfig)
-            if not stillAlive:
-                dead.add(trainingProcess)
-        for tp in dead:
-            # delete dead processes from hashmap
-            del self.training_configs[tp]
-        dead = set()
-        for genProcess in self.generating_songs.keys():
-            triple, targetConfig = self.generating_songs[genProcess]
-            stillAlive, triple = self.__check_process_triple(triple)
-            self.generating_songs[genProcess] = (triple, targetConfig)
-            if not stillAlive:
-                dead.add(genProcess)
-        for gp in dead:
-            # delete dead processes from hashmap
-            del self.generating_songs[gp]
-
-    def get_music_files(self):
-        self.__cleanup()
-        return os.listdir(self.upload_dir)
-
-    def get_trained_configs(self):
-        self.__cleanup()
-        return os.listdir(self.config_dir)
-
-    def get_generated_songs(self):
-        self.__cleanup()
-        return os.listdir(self.generated_song_dir)
-
-    def get_training_configs(self):
-        self.__cleanup()
-        return [{
-            'name': self.training_configs[config][1],
-            'output': self.get_config_output(config)
-        } for config in self.training_configs.keys()]
-
-    def get_generating_songs(self):
-        self.__cleanup()
-        return [{
-            'name': self.training_configs[procname][1],
-            'output': self.get_generating_song_output(procname),
-        } for procname in self.generating_songs.keys()]
-
-    def __start_process_from_command(self, cmd):
-        """
-        Returns a (process, queue, string) triple, where the process represents the
+        Returns a (process, queue) pair, where the process represents the
         running process, the queue can be used to read stdout and stderr from the
-        process, and the string is the empty string, for use later to buffer read
-        output
+        process.
         We assume that cmd is a list of strings, the first containing a program to
         run, and the remaining strings being the arguments to pass to the program
         """
 
-        def enqueue_output(out, queue):
+        def block_on_output(out):
             for line in iter(out.readline, b''):
-                queue.put(line)
+                stdouthandler(line)
+            deathhandler()
             out.close()
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        queue = Queue()
-        thread = Thread(target=enqueue_output, args=(process.stdout, queue))
+        #queue = Queue()
+        thread = Thread(target=block_on_output, args=(process.stdout,))
         thread.daemon = True  # thread dies with the program
         thread.start()
 
-        return process, queue, ''
+        #return process, queue
 
-    def start_training_process(self, config, files, iterations, start_config=None):
-        self.__cleanup()
-        trainingFiles = self.get_music_files()
+
+class Process:
+  """
+  A class to represent a process,
+  it contains a Popen object reference, along
+  with some other useful data related to
+  the process's execution
+  """
+  def __init__(self, cmd, progressChangeHandler=None, terminationHandler=None):
+
+    self.lines = []
+    self.percentDone = 0
+    self.isDead = False
+
+    def handleStdout(line):
+      #print "Got line! {}".format(line)
+      self.lines.append(line)
+      toks = line.split()
+      if len(toks) == 2 and toks[0].strip() == 'PERCENT:':
+        self.percentDone = int(toks[1])
+        #print "Percent change detected!!! {}".format(self.percentDone)
+        if self.percentDone > 100:
+          raise ValueError("Percentage done unexpectedly greater than 100")
+        if self.percentDone < 0:
+          raise ValueError("Percentage done unexpectedly less than 0")
+        if progressChangeHandler != None:
+          progressChangeHandler(self.percentDone)
+
+    def handleDeath():
+      #print "DEATH DETECTED!!!"
+      self.isDead = True
+      if terminationHandler != None:
+        terminationHandler()
+
+    start_process(cmd, handleStdout, handleDeath)
+
+  #read the process output, update the
+  #lines and percent done fields appropriately
+  #Note that between calls to this method, the
+  #public state of the process can't change
+  #EDIT: We're actually just going to have the
+  #thread monitoring the processes make these
+  #changes now, so this could probably be
+  #removed
+  def harvestProcessOut(self):
+    pass
+#    # read stdout and append to "output"
+#    try:
+#        stdout = self.q.get_nowait()  # or queue.get(timeout=.1)
+#    except Empty:
+#        # nothing to read
+#        pass
+#    else:
+#        stdout = stdout.splitlines()
+#        if len(stdout) == 0:
+#          #I'm not even sure that this can happen
+#          #but anyways do nothing
+#          pass
+#        else:
+#          stdout[0] = self.lines[-1] + stdout[0]
+#          del self.lines[-1]
+#          #possibly a smarter way would be to start
+#          #at the end going backwards and bail after
+#          #the first update, but probably this is fine
+#          for line in stdout:
+#            print "Processing stdout line: {}".format(line)
+#            toks = line.split()
+#            if len(toks) == 2 and toks[0].strip() == 'PERCENT:':
+#              self.percentDone = int(toks[1])
+#              print "Percent change detected!!! {}".format(self.percentDone)
+#              if self.percentDone > 100:
+#                raise ValueError("Percentage done unexpectedly greater than 100")
+#              if self.percentDone < 0:
+#                raise ValueError("Percentage done unexpectedly less than 0")
+#          self.lines = self.lines + stdout
+#
+#    if not self.p.poll() is None:
+#      self.isDead = True
+
+  def getAllOutput(self):
+    return '\n'.join(self.lines)
+
+
+
+class Backend:
+
+    def __init__(self, upload_dir, config_dir, generated_song_dir, scriptroot):
+        self.upload_dir = upload_dir + '/'
+        self.config_dir = config_dir + '/'
+        self.generated_song_dir = generated_song_dir + '/'
+        self.scriptroot = scriptroot + '/'
+        self.training_configs = {}
+        self.generating_songs = {}
+
+    def __cleanup(self):
+        dead = set()
+        for pname in self.training_configs.keys():
+            proc = self.training_configs[pname]
+            proc.harvestProcessOut()
+            if proc.isDead:
+              dead.add(pname)
+        for pname in dead:
+            # delete dead processes from hashmap
+            del self.training_configs[pname]
+        dead = set()
+        for pname in self.generating_songs.keys():
+            proc = self.generating_songs[pname]
+            proc.harvestProcessOut()
+            if proc.isDead:
+              dead.add(pname)
+        for pname in dead:
+            # delete dead processes from hashmap
+            del self.generating_songs[pname]
+
+    def start_training_process(self, config, files, iterations, progressChangeHandler=None, terminationHandler=None, start_config=None):
+        """
+        Starts training a configuration.
+        :param config: The config name
+        :param files: The list of files to train on
+        :param iterations: The number of iteration to train
+        :param start_config: An optional start config
+        """
+
+        #Check that training files are all valid
+        trainingFiles = os.listdir(self.upload_dir)
         for xmlfile in files:
             if xmlfile not in trainingFiles:
                 raise ValueError("got {} as xml file argument, but this is not a training file")
+
+        #Check start_config parameter is unused
         if start_config is not None:
             raise ValueError("Start config not supported yet")
-        if config in self.get_trained_configs():
+
+        #Check config hasn't already been generated
+        if config in os.listdir(self.config_dir):
             raise ValueError("target config name {} is already an existing config".format(config))
-        if config in [name for name, output in self.get_training_configs()]:
+
+        #Check config isn't being generated
+        if config in self.training_configs.keys():
             raise ValueError(
-                "target config name {} is already in use by currently running process".format(config))
+                "target config is already being generated".format(config))
 
         cmd = [
             'python',
-            'train.py',
+            self.scriptroot + 'train.py',
             self.config_dir + config,
             ' '.join([self.upload_dir + xmlfile for xmlfile in files]),
             str(iterations)
         ]
-        self.training_configs[config] = (self.__start_process_from_command(cmd), config)
+        print ' '.join(cmd)
 
-    def start_music_generation_process(self, process_name, trained_config, output_song_name, song_length):
+        self.training_configs[config] = Process(cmd, progressChangeHandler, terminationHandler)
+        self.__cleanup()
+
+    def start_music_generation_process(self, trained_config, song_name, song_length, progressChangeHandler=None, terminationHandler=None):
         """
         Starts generating the song.
-        :param process_name: The name of the process
+        The process name is the unique combination of the config name and song name
         :param trained_config: The name of the config
-        :param output_song_name: The name of the output song
+        :param song_name: The name of the output song
         :param song_length: The number of seconds of the generated song
         """
-        self.__cleanup()
-        if process_name == None:
-            raise ValueError("got None as process name")
-        if process_name in self.generating_songs.keys():
-            raise ValueError("name {} is already a music generation process".format(process_name))
-        if output_song_name in self.get_generated_songs():
-            raise ValueError("target music file {} is already a generated piece of music".format(output_song_name))
-        if output_song_name in self.get_generating_songs():
-            raise ValueError(
-                "target music file  {} is already being generated by currently running process".format(
-                    output_song_name))
+
+        #check config file exists
+        if not trained_config in os.listdir(self.config_dir):
+            raise ValueError("Config to use does not exist")
+        #check we're not already generating this song
+        if song_name in self.generating_songs.keys():
+            raise ValueError("song {} is already being generated".format(process_name))
+        #check the song hasn't already been generated
+        if song_name in os.listdir(self.generated_song_dir):
+            raise ValueError("target music file {} is already a generated piece of music".format(song_name))
 
         cmd = [
             'python',
-            'genmusic.py',
+            self.scriptroot + 'genmusic.py',
             self.config_dir + trained_config,
-            self.generated_song_dir + output_song_name, str(song_length)
+            self.generated_song_dir + song_name, str(song_length)
         ]
-        processTriple = self.__start_process_from_command(cmd)
 
-        self.generating_songs[process_name] = (processTriple, output_song_name)
-
-    def get_config_output(self, process_name):
+        self.generating_songs[song_name] = Process(cmd, progressChangeHandler, terminationHandler)
         self.__cleanup()
-        if process_name not in self.training_configs:
-            return "(terminated)"
-        else:
-            processTriple, targetConfig = self.training_configs[process_name]
-            proc, q, outputbuf = processTriple
-            return outputbuf
 
     def get_status(self):
         """
         Gets the status of the system
         """
+
+        #Will remove dead processes, also
+        #update output/percent complete
+        #for all process objects
         self.__cleanup()
+
+        trainingConfigs = []
+        for tcname in self.training_configs.keys():
+          proc = self.training_configs[tcname]
+          trainingConfigs.append({
+            'name': tcname,
+            'output': proc.getAllOutput(),
+            'progress': proc.percentDone
+          })
+
+        generatingSongs = []
+        for gsname in self.generating_songs.keys():
+          proc = self.generating_songs[gsname]
+          generatingSongs.append({
+            'name': gsname,
+            'output': proc.getAllOutput(),
+            'progress': proc.percentDone
+          })
+
+        generatedSongs = []
+        for song in os.listdir(self.generated_song_dir):
+          #TODO: We can open the midi file and determine
+          #the length by counting midi ticks, for generated
+          #music it should be 8*55 ticks per seconds, we can
+          #also cache these in a hashmap for faster lookup,
+          #but this isn't implemented yet
+          #For tempo, it's not clear to me that it makes
+          #sense to provide, IMO probably just provide length
+          generatedSongs.append({
+            'name': song,
+            'tempo': 128,
+            'length': '3:02'
+          })
+
         return {
-            'music_files': self.get_music_files(),
-            'training_configs': self.get_training_configs(),
-            'trained_configs': self.get_trained_configs(),
-            'generating_songs': self.get_generating_songs(),
-            'generated_songs': self.get_generated_songs(),
+            'music_files': os.listdir(self.upload_dir),
+            'training_configs': trainingConfigs,
+            'trained_configs': os.listdir(self.config_dir),
+            'generating_songs': generatingSongs,
+            'generated_songs': generatedSongs,
         }
-
-    def get_music_gen_process_names(self, process_name):
-        return self.generating_songs.keys()
-
-    def get_generating_song_output(self, process_name):
-        self.__cleanup()
-        if process_name not in self.generating_songs:
-            return "(terminated)"
-        else:
-            processTriple, targetConfig = self.generating_songs[process_name]
-            proc, q, outputbuf = processTriple
-            return outputbuf
 
 
 # for testing
 if __name__ == '__main__':
-    adm = Backend()
-    adm.start_music_generation_process('genproc', 'config', 'generated_out.mid', 100)
+    backend = Backend()
+    backend.start_training_process("config", ["JSB_BWV1047_1.xml"], 100)
+    # backend.start_music_generation_process('config', 'generated_out.mid', 100)
+

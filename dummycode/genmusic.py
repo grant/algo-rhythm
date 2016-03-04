@@ -25,21 +25,27 @@ if __name__ == '__main__':
   slices_to_generate = 8 * numseconds
 
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
+  print "PERCENT: 20"
   sys.stdout.flush()
   sleep(1)
   print "Still generating music..."
+  print "PERCENT: 40"
   sys.stdout.flush()
   sleep(1)
   print "Still generating music... (2)"
+  print "PERCENT: 50"
   sys.stdout.flush()
   sleep(1)
   print "Still generating music... (3)"
+  print "PERCENT: 60"
   sys.stdout.flush()
   sleep(1)
   print "Still generating music... (4)"
+  print "PERCENT: 85"
   sys.stdout.flush()
   sleep(1)
   print "Done generating music, writing out..."
+  print "PERCENT: 100"
   sys.stdout.flush()
 
 

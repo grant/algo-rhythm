@@ -47,15 +47,19 @@ print "Starting training, using {} iterations".format(numiterations)
 sys.stdout.flush()
 sleep(1.0)
 print "Doing a lot of rounds of training..."
+print "PERCENT: 10"
 sys.stdout.flush()
 sleep(3.0)
 print "Doing more rounds of training..."
+print "PERCENT: 50"
 sys.stdout.flush()
 sleep(3.0)
 print "Almost done..."
+print "PERCENT: 85"
 sys.stdout.flush()
 sleep(3.0)
 print "Complete!!!!"
+print "PERCENT: 100"
 sys.stdout.flush()
 
 outfile = open(outfile, 'w')
