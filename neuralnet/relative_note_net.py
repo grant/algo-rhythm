@@ -71,7 +71,7 @@ def midi_to_note_list(track, absolute=False):
     for pitch in started_notes.keys():
         index, time = started_notes[pitch]
         notes[index] = (pitch, time, tick - time)
-    prev_pitch = 0
+    prev_pitch = notes[0][0]
     prev_time = 0
     note_list = []
     for pitch, time, duration in notes:
@@ -91,18 +91,18 @@ def midi_to_note_list(track, absolute=False):
 #for tick relative.  The XML parse code can be
 #written to specify notes either relatively or
 #absolutely
-def note_list_to_midi_XML(notes):
-    return note_list_to_midi(notes, tickscale = 55)
+def note_list_to_midi_XML(notes, start_pitch):
+    return note_list_to_midi(notes, start_pitch, tickscale = 55)
 
 #NOTE: Previously each slice in the ANN was one midi
 #tick, but now that we're using XML, each slice should
 #actually be 55 ticks
-def note_list_to_midi(notes, tickscale = 1):
+def note_list_to_midi(notes, start_pitch, tickscale = 1):
     """
     Converts a list of RelativeNotes to a MIDI track
     """
     track = midi.Track(tick_relative=False)
-    pitch = 0
+    pitch = start_pitch
     time = 0
     for note in notes:
         pitch, time, duration = note.get_absolute(pitch, time)
@@ -119,23 +119,23 @@ def note_list_to_midi(notes, tickscale = 1):
     return track
 
 #returns one note list for each track in the file
-def note_lists_for_file(filename):
+def note_lists_for_file(filename, absolute=False):
     retval = []
     pattern = midi.read_midifile(filename)
     for track in pattern:
-        l = midi_to_note_list(track)
+        l = midi_to_note_list(track, absolute)
         if len(l):
             retval.append(l)
     return retval
 
-def get_note_lists(path):
+def get_note_lists(path, absolute=False):
     """
     Extract RelativeNote lists from all midi files in a folder.
     """
     lists = []
     for f in os.listdir(path):
         if f.endswith('.mid'):
-            lists.extend(note_lists_for_file(path + f))
+            lists.append(note_lists_for_file(path + f, absolute))
     return lists
 
 def get_notelist_for_xml(filename, absolute=False):
@@ -185,7 +185,7 @@ def get_note_lists_XML(path, absolute=False):
 
 def train_note_list_net(net, lists, dropout=.5, output_rate=100,
                         output_length=64, total_epochs=5000, absolute=False,
-                        path = 'net_output/note_list/'):
+                        path = '../net_output/note_list/'):
     """
     Trains a neural network, taking time notes from relative note lists
     as input.
@@ -221,7 +221,7 @@ def note_list_net_generate(net, length, path, start_note=60, absolute = False):
     the default for which is middle C.
     """
     net.reset()
-    last = [RelativeNote(pitch=start_note).get_binary()]
+    last = [RelativeNote().get_binary()]
     notes = []
     for i in xrange(length):
         note = net.run(last)
@@ -230,16 +230,17 @@ def note_list_net_generate(net, length, path, start_note=60, absolute = False):
         else:
             notes.append(RelativeNote(map(lambda x: int(round(x)), note[0])))
         last = note
-    midi.write_midifile(path, midi.Pattern([note_list_to_midi_XML(notes)]))
+    midi.write_midifile(path, midi.Pattern([note_list_to_midi_XML(notes,
+                                                                  start_note)]))
 
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print 'Usage: python relative_note_net.py [boolean]'
     else:
-        net = MLP(40, 40, [256, 256], bool(sys.argv[1]))
+        net = MLP(40, 40, [256, 256], True)
         #lists = get_note_lists('midisamples_raw/')
-        lists = get_note_lists_XML('musicxml/', bool(sys.argv[1]))
-        train_note_list_net(net, lists)
+        lists = get_note_lists_XML('../training_xml_all/', bool(sys.argv[1]))
+        train_note_list_net(net, lists, absolute=bool(sys.argv[1]))
 
 
