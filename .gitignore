@@ -5,6 +5,8 @@ node_modules/
 www/backend/trained_configs/
 www/backend/music_uploads/
 www/backend/static/build/
+dummycode/trained_configs/
+dummycode/generated_music/
 
 .DS_Store
 .idea
