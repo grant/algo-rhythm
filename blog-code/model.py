@@ -235,6 +235,9 @@ class Model(object):
     
     def _predict_step_note(self, in_data_from_time, *states):
         # States is [ *hiddens, last_note_choice ]
+
+        print "model._predict_step_note() called"
+
         hiddens = list(states[:-1])
         in_data_from_prev = states[-1]
         in_data = T.concatenate([in_data_from_time, in_data_from_prev])
