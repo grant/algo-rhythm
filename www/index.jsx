@@ -8,6 +8,10 @@ import TrainingSection from './components/TrainingSection';
 import UploadingSection from './components/UploadingSection';
 import AppHeader from './components/AppHeader';
 import DEBUG from './utils/debug';
+import NotificationManager from './utils/NotificationManager';
+import {OrderedSet} from 'immutable';
+import {Notification, NotificationStack} from 'react-notification';
+
 
 $(document).ready(function(){
   // Always be scrolled to the top on page load
@@ -38,7 +42,9 @@ export default class App extends React.Component {
         music_files: [],
         trained_configs: [],
         training_configs: [],
-      }
+      },
+      notifications: OrderedSet(),
+      notificationCount: 0,
     };
 
     // Setup websockets
@@ -60,8 +66,15 @@ export default class App extends React.Component {
       trained_configs,
       training_configs,
     } = this.state.status;
+
     return (
       <div className='App'>
+        <NotificationStack
+          notifications={this.state.notifications.toArray()}
+          onDismiss={notification => this.setState({
+            notifications: this.state.notifications.delete(notification)
+          })}
+        />
         <AppHeader />
         <div className="content">
           <GeneratedMusicSection
@@ -77,6 +90,29 @@ export default class App extends React.Component {
       </div>
     );
   }
+
+  addNotification(message) {
+    const { notifications, notificationCount } = this.state;
+    const id = notifications.size + 1;
+    const newCount = notificationCount + 1;
+
+    return this.setState({
+      notificationCount: newCount,
+      notifications: notifications.add({
+        message: message,
+        key: newCount,
+        style: {
+          bar: {
+            backgroundColor: 'rgb(255, 89, 55)',
+            color: 'white',
+          },
+        }
+      })
+    });
+  }
 }
 
-ReactDOM.render(<App/>, document.querySelector("#app"));
+let AppDOM = ReactDOM.render(<App />, document.querySelector("#app"));
+NotificationManager.setMessageHandler((message) => {
+  AppDOM.addNotification(message);
+});
