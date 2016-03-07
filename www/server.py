@@ -111,43 +111,8 @@ def train():
     iterations = request.form['iterations']
     name = request.form['name']
 
-    # Error checking
-    status = backend.get_status()
-    currentlyTrained = status['trained_configs']
-    currentlyTraining = [training['name'] for training in status['training_configs']]
-    if len(files) == 0:
-        raise RuntimeError('No files checked')
-    if name in currentlyTrained:
-        raise RuntimeError('Config with that name already exists')
-    if name in currentlyTraining:
-        raise RuntimeError('Config with that name is being trained')
+    start_training(files=files, iterations=iterations, name=name)
 
-    ###################### HANDLING OF TRAINING PROCESS EVENTS HERE ############################
-
-    def handleProgressChange(newPercentDone):
-        processHandlerLock.acquire()
-        print "Progress changed for training process {} to {}%".format(name, newPercentDone)
-        with app.app_context():
-            broadcastStatus()
-        processHandlerLock.release()
-
-    def handleTermination():
-        processHandlerLock.acquire()
-        print "Training process {} terminated!!!!".format(name)
-        with app.app_context():
-            broadcastStatus()
-        processHandlerLock.release()
-
-    ######################   (can we send updates to the browser?)   ############################
-
-    # Create the new training process
-    backend.start_training_process(
-        config=name,
-        files=files,
-        iterations=iterations,
-        progressChangeHandler=handleProgressChange,
-        terminationHandler=handleTermination
-    )
     return redirect('/?animate=false')
 
 
@@ -158,6 +123,12 @@ def generate_music():
     length = request.form['length']
     name = request.form['name']
 
+    start_generation(config_file=config_file, length=length, name=name)
+
+    return redirect('/?animate=false')
+
+
+def start_generation(config_file, length, name):
     # Error checking
     status = backend.get_status()
     currentlyGenerated = status['generated_songs']
@@ -170,23 +141,19 @@ def generate_music():
     if name in currentlyGenerating:
         raise RuntimeError('song with that name is being generated')
 
-    ###################### HANDLING OF MUSIC GENERATION PROCESS EVENTS HERE ############################
-
     def handleProgressChange(newPercentDone):
         processHandlerLock.acquire()
         print "Progress changed for generation process for {} to {}%".format(name, newPercentDone)
         with app.app_context():
-            broadcastStatus()
+            broadcast_status()
         processHandlerLock.release()
 
     def handleTermination():
         processHandlerLock.acquire()
         print "Generation process for {} terminated!!!!".format(name)
         with app.app_context():
-            broadcastStatus()
+            broadcast_status()
         processHandlerLock.release()
-
-    ##########################   (can we send updates to the browser?)   ###############################
 
     # Create the new generation process
     backend.start_music_generation_process(
@@ -197,16 +164,60 @@ def generate_music():
         terminationHandler=handleTermination
     )
 
-    return redirect('/?animate=false')
+
+def start_training(files, name, iterations):
+    # Error checking
+    status = backend.get_status()
+    currentlyTrained = status['trained_configs']
+    currentlyTraining = [training['name'] for training in status['training_configs']]
+    if len(files) == 0:
+        raise RuntimeError('No files checked')
+    if name in currentlyTrained:
+        raise RuntimeError('Config with that name already exists')
+    if name in currentlyTraining:
+        raise RuntimeError('Config with that name is being trained')
+
+    def handleProgressChange(newPercentDone):
+        processHandlerLock.acquire()
+        print "Progress changed for training process {} to {}%".format(name, newPercentDone)
+        with app.app_context():
+            broadcast_status()
+        processHandlerLock.release()
+
+    def handleTermination():
+        processHandlerLock.acquire()
+        print "Training process {} terminated!!!!".format(name)
+        with app.app_context():
+            broadcast_status()
+        processHandlerLock.release()
+
+    # Create the new training process
+    backend.start_training_process(
+        config=name,
+        files=files,
+        iterations=iterations,
+        progressChangeHandler=handleProgressChange,
+        terminationHandler=handleTermination
+    )
 
 
-def broadcastStatus():
+def broadcast_status():
     emit('status', backend.get_status(), broadcast=True, namespace='/')
 
 
 @socketio.on('connect')
-def test_connect():
+def on_connect():
     emit('status', backend.get_status(), namespace='/')
+
+
+@socketio.on('train')
+def on_train(data):
+    start_training(files=data['file'], name=data['name'], iterations=data['iterations'])
+
+
+@socketio.on('generate')
+def on_generate(data):
+    start_generation(config_file=data['config'], name=data['name'], length=data['length'])
 
 
 # View uploaded file
@@ -217,7 +228,7 @@ def view_upload(name=None):
 
 @app.route('/status', methods=['GET'])
 def status():
-    broadcastStatus()
+    broadcast_status()
     return jsonify(**backend.get_status())
 
 

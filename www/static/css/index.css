@@ -121,6 +121,7 @@ header .logo {
 }
 
 .group {
+  overflow: hidden;
   padding: 20px;
   margin: 20px 0;
   border: 1px solid #eee;
@@ -207,6 +208,10 @@ header .logo {
   margin: 10px 0;
 }
 
+.generate-music input[type='submit'], .train-config input[type='submit'] {
+  margin: 0 10px;
+}
+
 /* progress-bar */
 .progress-bar {
   width: 100%;
@@ -218,6 +223,7 @@ header .logo {
 }
 .progress-bar .name, .progress-bar .bar {
   position: absolute;
+  text-shadow: 0px 0px 3px rgba(0,0,0,.3);
   top: 0;
   left: 0;
   width: 100%;

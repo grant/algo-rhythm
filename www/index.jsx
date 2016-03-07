@@ -1,12 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
-import io from 'socket.io-client';
+import socket from './utils/socket';
 import GeneratedMusicSection from './components/GeneratedMusicSection';
 import SongGenerationSection from './components/SongGenerationSection';
 import TrainingSection from './components/TrainingSection';
 import UploadingSection from './components/UploadingSection';
 import AppHeader from './components/AppHeader';
+import DEBUG from './utils/debug';
 
 $(document).ready(function(){
   // Always be scrolled to the top on page load
@@ -41,9 +42,10 @@ export default class App extends React.Component {
     };
 
     // Setup websockets
-    var socket = io.connect();
     socket.on('status', status => {
-      console.log('Updated status', status);
+      if (DEBUG) {
+        console.log('Updated status', status);
+      }
       this.setState({
         status: status,
       })
