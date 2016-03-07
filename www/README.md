@@ -1,10 +1,12 @@
-# Flask web server with React + Socket.io frontend
+# www
+
+Flask web server with React + socket.io frontend
 
 ## Tech
 
 These are the tools you'll need to develop on this repo.
 
-### Backend (python)
+### Backend (Flask)
 - [Flask](http://flask.pocoo.org/) - Web Server
 - [socket.io](https://github.com/miguelgrinberg/Flask-SocketIO) - Send notifications to users
 
