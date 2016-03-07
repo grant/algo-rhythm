@@ -10,6 +10,7 @@ import AppHeader from './components/AppHeader';
 
 $(document).ready(function(){
   // Always be scrolled to the top on page load
+  // TODO Doesn't work
   setTimeout(function() {
     $(this).scrollTop(0);
   }, 0);
@@ -22,10 +23,6 @@ $(document).ready(function(){
     var songName = $(this).data('name');
     console.log('toggle: ', songName);
     $(this).toggleClass('playing');
-  });
-
-  $('.section.upload input[type="file"]').on('change', function() {
-    $('.section.upload .form').submit();
   });
 });
 
@@ -46,6 +43,7 @@ export default class App extends React.Component {
     // Setup websockets
     var socket = io.connect();
     socket.on('status', status => {
+      console.log('Updated status', status);
       this.setState({
         status: status,
       })

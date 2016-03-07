@@ -18,7 +18,7 @@ export default class TrainingProcess extends React.Component {
             training_configs.map(config => {
               return (
                 <li key={config.name} className="config">
-                  <ProgressBar name={config.name} progress={config.process} />
+                  <ProgressBar name={config.name} progress={config.progress} />
                 </li>
               );
             })

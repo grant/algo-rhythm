@@ -19,7 +19,7 @@ export default class TrainConfig extends React.Component {
                 return (
                   <li key={file} className="file">
                     <label>
-                      <input type="checkbox" name="file" value="{file}" />
+                      <input type="checkbox" name="file" value={file} />
                       {file}
                     </label>
                   </li>

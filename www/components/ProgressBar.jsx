@@ -1,17 +1,18 @@
 import React from 'react';
 
 export default class ProgressBar extends React.Component {
-  static get defaultProps() {
+  static get propTypes() {
     return {
-      // generatedmusic: []
-    }
+      name: React.PropTypes.string.isRequired,
+      progress: React.PropTypes.number.isRequired,
+    };
   }
 
   render() {
     return (
       <div className="ProgressBar progress-bar">
         <div className="name">{this.props.name}</div>
-        <div className="bar" style={`width: ${this.props.progress}%`}></div>
+        <div className="bar" style={{width: this.props.progress + '%'}}></div>
       </div>
     );
   }

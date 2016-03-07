@@ -20,7 +20,7 @@ export default class GenerateMusic extends React.Component {
                 return (
                   <li key={tc}>
                     <label>
-                      <input type="radio" name="config" value="{tc}" />
+                      <input type="radio" name="config" value={tc} />
                       {tc}
                     </label>
                   </li>
