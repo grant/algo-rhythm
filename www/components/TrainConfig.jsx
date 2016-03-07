@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import socket from '../utils/socket';
+import NotificationManager from '../utils/NotificationManager';
 
 const STATE_DEFAULT = {
   name: '',
@@ -39,6 +40,8 @@ export default class TrainConfig extends React.Component {
 
       // Reset fields
       this.setState(STATE_DEFAULT);
+
+      NotificationManager.sendMessage(`Training config: "${valObject.name}"`);
 
       socket.emit('train', valObject);
     }
@@ -81,7 +84,7 @@ export default class TrainConfig extends React.Component {
             min="1"
             max="9999"
             value={this.state.iterations}
-            onChange={this.onIterationsChange.bind(this)}
+            onChange={::this.onIterationsChange}
           />
           <h3 className="subtitle">Config Name</h3>
           <input
@@ -89,7 +92,7 @@ export default class TrainConfig extends React.Component {
             value={this.state.name}
             name="name"
             required="true"
-            onChange={this.onNameChange.bind(this)}
+            onChange={::this.onNameChange}
           />
           <input type="submit" value="Generate Config" />
         </form>
@@ -98,10 +101,10 @@ export default class TrainConfig extends React.Component {
   }
 
   onNameChange(e) {
-    this.setState({...this.state, name: e.target.value});
+    this.setState({name: e.target.value});
   }
   onIterationsChange(e) {
-    this.setState({...this.state, iterations: e.target.value});
+    this.setState({iterations: e.target.value});
   }
   onCheckboxChange(file, e) {
     let files;
@@ -111,6 +114,6 @@ export default class TrainConfig extends React.Component {
       files = this.state.files.slice(0);
       delete files[files.indexOf(file)];
     }
-    this.setState({...this.state, files: files});
+    this.setState({files: files});
   }
 }

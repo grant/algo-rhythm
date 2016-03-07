@@ -1,6 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import socket from '../utils/socket';
+import NotificationManager from '../utils/NotificationManager';
 
 const STATE_DEFAULT = {
   name: '',
@@ -34,6 +35,8 @@ export default class GenerateMusic extends React.Component {
 
       // Reset fields
       this.setState(STATE_DEFAULT);
+
+      NotificationManager.sendMessage(`Generating song: "${valObject.name}"`);
 
       socket.emit('generate', valObject);
     }
@@ -77,7 +80,7 @@ export default class GenerateMusic extends React.Component {
             min="1"
             max="999"
             value={this.state.length}
-            onChange={this.onLengthChange.bind(this)}
+            onChange={::this.onLengthChange}
             />
           <h3 className="subtitle">Song name</h3>
           <input
@@ -85,7 +88,7 @@ export default class GenerateMusic extends React.Component {
             required="true"
             name="name"
             value={this.state.name}
-            onChange={this.onNameChange.bind(this)}
+            onChange={::this.onNameChange}
           />
           <input type="submit" value="Generate Song" />
         </form>
@@ -94,12 +97,12 @@ export default class GenerateMusic extends React.Component {
   }
 
   onNameChange(e) {
-    this.setState({...this.state, name: e.target.value});
+    this.setState({name: e.target.value});
   }
   onLengthChange(e) {
-    this.setState({...this.state, length: e.target.value});
+    this.setState({length: e.target.value});
   }
   onRadioChange(config, e) {
-    this.setState({...this.state, config: config});
+    this.setState({config: config});
   }
 }
