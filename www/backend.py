@@ -245,11 +245,8 @@ class Backend:
           #music it should be 8*55 ticks per seconds, we can
           #also cache these in a hashmap for faster lookup,
           #but this isn't implemented yet
-          #For tempo, it's not clear to me that it makes
-          #sense to provide, IMO probably just provide length
           generatedSongs.append({
             'name': song,
-            'tempo': 128,
             'length': '3:02'
           })
 

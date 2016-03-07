@@ -19,7 +19,6 @@ export default class GeneratedMusicSection extends React.Component {
             <li className="song header">
               <span className="cell icon"></span>
               <span className="cell name">Song Name</span>
-              <span className="cell tempo">Tempo</span>
               <span className="cell length">Length</span>
             </li>
             {generated_songs.map(song => {
@@ -30,7 +29,6 @@ export default class GeneratedMusicSection extends React.Component {
                     <span className="stop">■</span>
                   </span>
                   <span className="cell name">{song.name}</span>
-                  <span className="cell tempo">{song.tempo}</span>
                   <span className="cell length">{song.length}</span>
                 </li>
               );
