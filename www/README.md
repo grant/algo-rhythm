@@ -28,8 +28,11 @@ Basically, the site flow works like this:
 ## Install Instructions
 
 Open two terminal windows:
+
 1. Run server
 2. Run clint build
+
+While developing, check both terminals for errors.
 
 ### Run Server
 
