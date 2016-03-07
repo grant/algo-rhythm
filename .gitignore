@@ -1,8 +1,10 @@
 # Custom ignore
 musicxml/midi
 net_output/
+node_modules/
 www/backend/trained_configs/
 www/backend/music_uploads/
+www/backend/static/build/
 
 .DS_Store
 .idea
