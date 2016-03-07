@@ -11,19 +11,19 @@ export default class SongGenerationProcesses extends React.Component {
   render() {
     let generating_songs = this.props.generating_songs;
     return (
-      <section className="SongGenerationProcesses section song-generation-processes">
-        <h1 className="title">Songs Being Generated</h1>
+      <section className='SongGenerationProcesses section song-generation-processes'>
+        <h1 className='title'>Songs Being Generated</h1>
         <ul>
           {generating_songs.length ? (
             generating_songs.map(song => {
               return (
-                <li key={song.name} className="song">
+                <li key={song.name} className={'song ' + (this.state.playingSong === song.name ? 'playing' : '')}>
                   <ProgressBar name={song.name} progress={song.progress} />
                 </li>
               );
             })
           ): (
-            <li className="song none">No music being generated</li>
+            <li className='song none'>No music being generated</li>
           )}
         </ul>
       </section>

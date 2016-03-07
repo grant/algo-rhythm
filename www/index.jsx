@@ -22,13 +22,6 @@ $(document).ready(function(){
 
   // Remove query parameters
   history.replaceState(null, "", location.href.split("?")[0]);
-
-  // Setup event handlers
-  $('.section.generated-music .song:not(.header)').click(function() {
-    var songName = $(this).data('name');
-    console.log('toggle: ', songName);
-    $(this).toggleClass('playing');
-  });
 });
 
 export default class App extends React.Component {
