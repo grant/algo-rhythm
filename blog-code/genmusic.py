@@ -69,10 +69,10 @@ if __name__ == '__main__':
         #thread dies
         return
 
-  noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), outfile)
-
   t = Thread(target = printApproximatePercentages)
   t.start()
+
+  noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), outfile)
 
   lock.acquire()
   print "{}: Done.".format(time.strftime("%c"))

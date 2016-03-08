@@ -475,25 +475,31 @@ def stateMatrixForSong(tree):
   return (pickupSlices, stateMatrix)
 
 
+#prints output on error conditions because this is
+#currently always the right thing to do
+def getStatematrixOffsetPairForXmlFile(filename, minslices = 0):
+  tree = xml.etree.ElementTree.parse(filename).getroot()
+  if getTempoForSong(tree) == None:
+    print "File {} has no tempo!!!".format(filename)
+    return None
+  else:
+    sm = stateMatrixForSong(tree)
+    songMatrix = sm[1]
+    if len(songMatrix) < minslices:
+      print "File {} omitted, it is too short.".format(theFile)
+      return None
+    else:
+      return sm
+
 def createStateMatrices(basedir = 'musicxml', minslices = 0):
 
   stateMatrices = {}
 
   for theFile in os.listdir(os.getcwd() + '/' + basedir):
-    if not theFile.split('.')[-1] == 'xml':
+    sm = getStatematrixOffsetPairForXmlFile(theFile, minslices)
+    if sm == None:
       continue
-        #parse xml file into document tree
-    print basedir + '/' + theFile
-    tree = xml.etree.ElementTree.parse(basedir + '/' + theFile).getroot()
-    if getTempoForSong(tree) == None:
-      print "File {} has no tempo!!!".format(theFile)
-    else:
-      sm = stateMatrixForSong(tree)
-      songMatrix = sm[1]
-      if len(songMatrix) < minslices:
-        print "File {} omitted, it is too short.".format(theFile)
-      else:
-        stateMatrices[theFile] = sm
+    stateMatrices[theFile] = sm
 
   return stateMatrices
 

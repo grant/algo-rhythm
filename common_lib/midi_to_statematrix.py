@@ -1,4 +1,5 @@
 import midi, numpy
+import xml.etree.ElementTree
 
 lowerBound = 24
 upperBound = 102
@@ -98,7 +99,7 @@ def noteStateMatrixToMidi(statematrix, name="example"):
     eot = midi.EndOfTrackEvent(tick=1)
     track.append(eot)
 
-    midi.write_midifile("{}.mid".format(name), pattern)
+    midi.write_midifile("{}".format(name), pattern)
 
 if __name__ == "__main__":
   midifile = "BWV772.MID"
