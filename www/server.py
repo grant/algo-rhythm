@@ -8,7 +8,11 @@ from flask import send_from_directory
 from werkzeug.utils import secure_filename
 
 # Move these constants here
-BACKEND_BASE = '../dummycode'
+#Use this for the dummy backend, useful
+#for testing web interface
+#BACKEND_BASE = '../dummycode'
+#Use this for Johnson blog code
+BACKEND_BASE = '../blog-code'
 UPLOAD_DIR = BACKEND_BASE + '/training_xml_web/'
 CONFIG_DIR = BACKEND_BASE + '/trained_configs/'
 GENERATED_SONG_DIR = BACKEND_BASE + '/generated_music/'
