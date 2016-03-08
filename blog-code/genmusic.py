@@ -13,8 +13,11 @@ def modelFromFile(filename):
   return mod
 
 percentDoneApprox = 0
+lock = threading.Lock() 
 
 if __name__ == '__main__':
+
+  print "Starting execution"
 
   if len(sys.argv) != 4:
     print "Needs exactly three args, configfile, output file and number of seconds of music to make"
@@ -55,20 +58,19 @@ if __name__ == '__main__':
   slices_to_generate = 8 * numseconds
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
 
-  lock = threading.Lock() 
 
-  def printApproximatePercentages():
-    while True:
+  def outputPercentages():
+    global percentDoneApprox
+    global lock
+    while percentDoneApprox != 100:
       time.sleep(float(numseconds * 6)/100)
       percentDoneApprox += 1
       lock.acquire()
       print "PERCENT: {}".format(percentDoneApprox)
+      sys.stdout.flush()
       lock.release()
-      if percentDoneApprox == 100:
-        #thread dies
-        return
 
-  t = Thread(target = printApproximatePercentages)
+  t = Thread(target = outputPercentages)
   t.start()
 
   noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), outfile)
