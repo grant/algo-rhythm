@@ -75,6 +75,7 @@ if __name__ == '__main__':
         def handleEpochStart(epoch):
           percentage = int(100 * float(epoch)/float(numiterations))
           print "PERCENT: {}".format(percentage)
+          sys.stdout.flush()
 
         print "Starting training..."
 	multi_training.trainPiece(m, pcs, numiterations, handleEpochStart)

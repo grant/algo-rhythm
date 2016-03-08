@@ -278,10 +278,10 @@ if __name__ == '__main__':
       print "Generation done!"
 
     backend = Backend(UPLOAD_DIR, CONFIG_DIR, GENERATED_SONG_DIR, SCRIPT_ROOT)
-    #backend.start_training_process("config", ["Marcia_Turca.xml", "bach_bouree_eminor.xml", "Mozart_Cadenza_2.0.xml"], 3, handleProgress, handleTerminationTraining)
-    # backend.start_music_generation_process('config', 'generated_out.mid', 100)
+    backend.start_training_process("config", ["Marcia_Turca.xml", "bach_bouree_eminor.xml", "Mozart_Cadenza_2.0.xml"], 3, handleProgress, handleTerminationTraining)
+    #backend.start_music_generation_process('config', 'generated_out.mid', 100)
 
-    backend.start_music_generation_process('params300.p', 'myexamplesong.mid', 15, handleProgress, handleTerminationGeneration)
+    #backend.start_music_generation_process('params300.p', 'myexamplesong.mid', 15, handleProgress, handleTerminationGeneration)
 
     for line in sys.stdin:
       print line
