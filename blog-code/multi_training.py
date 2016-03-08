@@ -41,30 +41,16 @@ def loadPiecesFromFileList(filesToLoad):
 
   minslices = batch_len
   stateMatrices = {}
+  pieces = {}
 
   for theFile in filesToLoad:
-    #parse xml file into document tree
-    print basedir + '/' + theFile
-    tree = xml.etree.ElementTree.parse(basedir + '/' + theFile).getroot()
-    if getTempoForSong(tree) == None:
-      print "File {} has no tempo!!!".format(theFile)
-    else:
-      sm = stateMatrixForSong(tree)
-      songMatrix = sm[1]
-      if len(songMatrix) < minslices:
-        print "File {} omitted, it is too short.".format(theFile)
-      else:
-        stateMatrices[theFile] = sm
+    sm = readxml.getStatematrixOffsetPairForXmlFile(theFile, batch_len)
+    if sm != None:
+      #here we ignore the offset which is parsed
+      #out of the music
+      pieces[theFile] = sm[1]
 
-  pieces = {}
-  for key in stateMatrices:
-    pieces[key] = stateMatrices[key][1]
   return pieces
-
-
-
-
-
 
 #def makeSegInSegOutFromStateMatrix(stateMatrix):
 #    seg_out = stateMatrix[start:start+batch_len]
@@ -96,6 +82,7 @@ def getPieceBatch(pieces):
     return numpy.array(i), numpy.array(o)
 
 def trainPiece(model,pieces,epochs, epochstarthandler=None, start=0):
+
     stopflag = [False]
     def signal_handler(signame, sf):
         stopflag[0] = True

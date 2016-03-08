@@ -2,7 +2,8 @@ import cPickle as pickle
 import gzip
 import numpy
 from midi_to_statematrix import *
-
+import sys, os, time
+from time import sleep
 import multi_training
 import model
 
@@ -65,17 +66,22 @@ def fetch_train_thoughts(m,pcs,batches,name="trainthoughts"):
 
 if __name__ == '__main__':
 
-	pcs = loadPiecesFromFileList(xmlfiles)
+	pcs = multi_training.loadPiecesFromFileList(xmlfiles)
 
+
+        print "Constructing neural net model..."
 	m = model.Model([300,300],[100,50], dropout=0.5)
 
         def handleEpochStart(epoch):
           percentage = int(100 * float(epoch)/float(numiterations))
           print "PERCENT: {}".format(percentage)
 
+        print "Starting training..."
 	multi_training.trainPiece(m, pcs, numiterations, handleEpochStart)
 
-	pickle.dump( m.learned_config, open( outfile, "wb" ) 
-)
+	pickle.dump( m.learned_config, open( outfile, "wb" ))
+
+        for line in sys.stdin:
+          print line
 
 

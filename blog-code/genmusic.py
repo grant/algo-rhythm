@@ -2,6 +2,8 @@ import cPickle as pickle
 from midi_to_statematrix import *
 import model, multi_training, midi_to_statematrix
 import sys, random, data, time, os
+import threading
+from threading import Thread
 
 
 def modelFromFile(filename):
@@ -51,14 +53,14 @@ if __name__ == '__main__':
   slices_to_generate = 8 * numseconds
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
 
-  lock = Threading.Lock()
+  lock = threading.Lock()
   percentDoneApprox = 0
 
   
 
   def printApproximatePercentages():
     while True:
-      sleep(6.0)
+      time.sleep(float(numseconds * 6)/100)
       percentDoneApprox += 1
       lock.acquire()
       print "PERCENT: {}".format(percentDoneApprox)
@@ -69,10 +71,13 @@ if __name__ == '__main__':
 
   noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), outfile)
 
+  t = Thread(target = printApproximatePercentages)
+  t.start()
+
   lock.acquire()
   print "{}: Done.".format(time.strftime("%c"))
   lock.release()
-  os._exit()
+  os._exit(0)
 
 
 
