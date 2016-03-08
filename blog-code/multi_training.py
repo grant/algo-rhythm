@@ -37,6 +37,35 @@ def loadPieces(dirpath):
       pieces[key] = tmp[key][1]
     return pieces
 
+def loadPiecesFromFileList(filesToLoad):
+
+  minslices = batch_len
+  stateMatrices = {}
+
+  for theFile in filesToLoad:
+    #parse xml file into document tree
+    print basedir + '/' + theFile
+    tree = xml.etree.ElementTree.parse(basedir + '/' + theFile).getroot()
+    if getTempoForSong(tree) == None:
+      print "File {} has no tempo!!!".format(theFile)
+    else:
+      sm = stateMatrixForSong(tree)
+      songMatrix = sm[1]
+      if len(songMatrix) < minslices:
+        print "File {} omitted, it is too short.".format(theFile)
+      else:
+        stateMatrices[theFile] = sm
+
+  pieces = {}
+  for key in stateMatrices:
+    pieces[key] = stateMatrices[key][1]
+  return pieces
+
+
+
+
+
+
 #def makeSegInSegOutFromStateMatrix(stateMatrix):
 #    seg_out = stateMatrix[start:start+batch_len]
 #    seg_in = noteStateMatrixToInputForm(seg_out)
@@ -66,7 +95,7 @@ def getPieceBatch(pieces):
     i,o = zip(*[getPieceSegment(pieces) for _ in range(batch_width)])
     return numpy.array(i), numpy.array(o)
 
-def trainPiece(model,pieces,epochs,start=0):
+def trainPiece(model,pieces,epochs, epochstarthandler=None, start=0):
     stopflag = [False]
     def signal_handler(signame, sf):
         stopflag[0] = True
@@ -74,14 +103,18 @@ def trainPiece(model,pieces,epochs,start=0):
     for i in range(start,start+epochs):
         if stopflag[0]:
             break
+        if epochstarthandler != None:
+          epochstarthandler(i)
         error = model.update_fun(*getPieceBatch(pieces))
         if i % 100 == 0:
             print "{}: epoch {}, error={}".format(time.strftime("%c"), i, error)
             sys.stdout.flush()
         if i % 500 == 0 or (i % 100 == 0 and i < 1000):
             xIpt, xOpt = map(numpy.array, getPieceSegment(pieces))
-            noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), model.predict_fun(batch_len, 1, xIpt[0])), axis=0),'output/sample{}'.format(i))
-            pickle.dump(model.learned_config,open('output/params{}.p'.format(i), 'wb'))
+            #don't output samples anymore
+            #noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), model.predict_fun(batch_len, 1, xIpt[0])), axis=0),'output/sample{}'.format(i))
+            #don't output params anymore
+            #pickle.dump(model.learned_config,open('output/params{}.p'.format(i), 'wb'))
     signal.signal(signal.SIGINT, old_handler)
 
 

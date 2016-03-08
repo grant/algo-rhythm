@@ -50,7 +50,29 @@ if __name__ == '__main__':
 
   slices_to_generate = 8 * numseconds
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
+
+  lock = Threading.Lock()
+  percentDoneApprox = 0
+
+  
+
+  def printApproximatePercentages():
+    while True:
+      sleep(6.0)
+      percentDoneApprox += 1
+      lock.acquire()
+      print "PERCENT: {}".format(percentDoneApprox)
+      lock.release()
+      if percentDoneApprox == 100:
+        #thread dies
+        return
+
   noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), outfile)
+
+  lock.acquire()
   print "{}: Done.".format(time.strftime("%c"))
+  lock.release()
+  os._exit()
+
 
 
