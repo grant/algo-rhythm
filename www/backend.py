@@ -1,5 +1,5 @@
 from threading import Thread
-import os
+import os, sys
 import subprocess
 from Queue import Queue, Empty
 
@@ -15,6 +15,7 @@ def start_process(cmd, stdouthandler, deathhandler):
 
         def block_on_output(out):
             for line in iter(out.readline, b''):
+                print line
                 stdouthandler(line)
             deathhandler()
             out.close()
@@ -154,7 +155,7 @@ class Backend:
         trainingFiles = os.listdir(self.upload_dir)
         for xmlfile in files:
             if xmlfile not in trainingFiles:
-                raise ValueError("got {} as xml file argument, but this is not a training file")
+                raise ValueError("got {} as xml file argument, but this is not a training file".format(xmlfile))
 
         #Check start_config parameter is unused
         if start_config is not None:
@@ -261,6 +262,28 @@ class Backend:
 
 # for testing
 if __name__ == '__main__':
-    backend = Backend()
-    backend.start_training_process("config", ["JSB_BWV1047_1.xml"], 100)
+    BACKEND_BASE = '../blog-code'
+    UPLOAD_DIR = BACKEND_BASE + '/training_xml_web/'
+    CONFIG_DIR = BACKEND_BASE + '/trained_configs/'
+    GENERATED_SONG_DIR = BACKEND_BASE + '/generated_music/'
+    SCRIPT_ROOT = BACKEND_BASE
+
+    def handleProgress(pctDone):
+      print "{}%".format(pctDone)
+
+    def handleTerminationTraining():
+      print "Training done!"
+
+    def handleTerminationGeneration():
+      print "Generation done!"
+
+    backend = Backend(UPLOAD_DIR, CONFIG_DIR, GENERATED_SONG_DIR, SCRIPT_ROOT)
+    #backend.start_training_process("config", ["Marcia_Turca.xml", "bach_bouree_eminor.xml", "Mozart_Cadenza_2.0.xml"], 3, handleProgress, handleTerminationTraining)
     # backend.start_music_generation_process('config', 'generated_out.mid', 100)
+
+    backend.start_music_generation_process('params300.p', 'myexamplesong.mid', 15, handleProgress, handleTerminationGeneration)
+
+    for line in sys.stdin:
+      print line
+
+
