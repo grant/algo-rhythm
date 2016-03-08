@@ -12,6 +12,8 @@ def modelFromFile(filename):
   mod.learned_config = learned_list
   return mod
 
+percentDoneApprox = 0
+
 if __name__ == '__main__':
 
   if len(sys.argv) != 4:
@@ -53,10 +55,7 @@ if __name__ == '__main__':
   slices_to_generate = 8 * numseconds
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
 
-  lock = threading.Lock()
-  percentDoneApprox = 0
-
-  
+  lock = threading.Lock() 
 
   def printApproximatePercentages():
     while True:
