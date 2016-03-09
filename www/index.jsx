@@ -7,16 +7,11 @@ import SongGenerationSection from './components/SongGenerationSection';
 import TrainingSection from './components/TrainingSection';
 import UploadingSection from './components/UploadingSection';
 import AppHeader from './components/AppHeader';
+import TutorialSection from './components/TutorialSection';
 import DEBUG from './utils/debug';
 import NotificationManager from './utils/NotificationManager';
 import {OrderedSet} from 'immutable';
 import {Notification, NotificationStack} from 'react-notification';
-
-
-$(document).ready(function(){
-  // Remove query parameters
-  history.replaceState(null, "", location.href.split("?")[0]);
-});
 
 export default class App extends React.Component {
   constructor(props) {
@@ -33,6 +28,8 @@ export default class App extends React.Component {
       notifications: OrderedSet(),
       notificationCount: 0,
       loading: true,
+      // The current section of the tutorial
+      tutorialSection: null,
     };
 
     // Setup websockets
@@ -54,6 +51,42 @@ export default class App extends React.Component {
           loading: false,
         });
       }, 1000);
+
+      // Check browser url
+      let query = location.href.split("?")[1] || '';
+      if (query.indexOf('tutorial') !== -1) {
+        this.startTutorial();
+      }
+      history.replaceState(null, "", location.href.split("?")[0]);
+    }
+  }
+
+  startTutorial() {
+    this.setState({
+      tutorialSection: 'UploadingSection',
+    });
+
+    $('.App').animate({ scrollTop: $(document).height() }, "slow");
+  }
+
+  onTutorialButtonClick(sectionName) {
+    if (sectionName === this.state.tutorialSection) {
+      const tutorialOrder = [
+        'UploadingSection',
+        'TrainingSection',
+        'SongGenerationSection',
+        'GeneratedMusicSection',
+      ];
+      const nextTutorialSection = tutorialOrder[tutorialOrder.indexOf(sectionName) + 1] || null;
+      // Scroll over to next section
+      if (nextTutorialSection) {
+        $('.App').animate({
+          scrollTop: $('.' + nextTutorialSection).closest('.TutorialSection').position().top
+        }, 1000);
+      }
+      this.setState({
+        tutorialSection: nextTutorialSection,
+      });
     }
   }
 
@@ -66,10 +99,14 @@ export default class App extends React.Component {
       training_configs,
     } = this.state.status;
 
-    let loadStyles = this.state.loading ? { overflow: 'hidden' } : {};
+    let classNames = [
+      'App',
+      this.state.loading ? 'loading' : '',
+      this.state.tutorialSection ? 'tutorial' : '',
+    ].join(' ');
 
     return (
-      <div className='App' style={loadStyles}>
+      <div className={classNames}>
         <NotificationStack
           notifications={this.state.notifications.toArray()}
           onDismiss={notification => this.setState({
@@ -78,15 +115,46 @@ export default class App extends React.Component {
         />
         <AppHeader />
         <div className="content">
-          <GeneratedMusicSection
-            generated_songs={generated_songs} />
-          <SongGenerationSection
-            generating_songs={generating_songs}
-            trained_configs={trained_configs} />
-          <TrainingSection
-            training_configs={training_configs}
-            music_files={music_files} />
-          <UploadingSection />
+          <nav className='nav'>
+            <button onClick={this.startTutorial.bind(this)} className='button help'>Help</button>
+          </nav>
+          <TutorialSection
+            buttonName={'Play your Music!'}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
+            sectionName={'GeneratedMusicSection'}
+            tutorialSection={this.state.tutorialSection}>
+            <GeneratedMusicSection
+              onButtonClick={this.onTutorialButtonClick.bind(this)}
+              tutorialSection={this.state.tutorialSection}
+              generated_songs={generated_songs} />
+          </TutorialSection>
+          <TutorialSection
+            buttonName={'Generate a Song'}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
+            sectionName={'SongGenerationSection'}
+            tutorialSection={this.state.tutorialSection}>
+            <SongGenerationSection
+              generating_songs={generating_songs}
+              trained_configs={trained_configs} />
+          </TutorialSection>
+          <TutorialSection
+            buttonName={'Choose Songs for a New Config'}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
+            sectionName={'TrainingSection'}
+            tutorialSection={this.state.tutorialSection}>
+            <TrainingSection
+              onButtonClick={this.onTutorialButtonClick.bind(this)}
+              tutorialSection={this.state.tutorialSection}
+              training_configs={training_configs}
+              music_files={music_files} />
+          </TutorialSection>
+          <TutorialSection
+            buttonName={'Upload a MusicXML file'}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
+            sectionName={'UploadingSection'}
+            tutorialSection={this.state.tutorialSection}>
+            <UploadingSection />
+          </TutorialSection>
         </div>
       </div>
     );

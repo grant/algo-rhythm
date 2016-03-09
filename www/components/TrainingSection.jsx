@@ -11,12 +11,17 @@ export default class TrainingSection extends React.Component {
   }
 
   render() {
+    let {
+      training_configs,
+      music_files
+    } = this.props;
+
     return (
       <section className="TrainingSection section group" name="training">
         <TrainingProcess
-          training_configs={this.props.training_configs} />
+          training_configs={training_configs} />
         <TrainConfig
-          music_files={this.props.music_files} />
+          music_files={music_files} />
       </section>
     );
   }

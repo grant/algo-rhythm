@@ -20,6 +20,13 @@ input[type='radio'], input[type='checkbox'] {
 
 .App {
   overflow-y: scroll;
+  transition: background-color 1s;
+}
+.App.loading {
+  overflow: hidden;
+}
+.App.tutorial {
+  background-color: #222;
 }
 
 /* Header */
@@ -31,8 +38,17 @@ input[type='radio'], input[type='checkbox'] {
     height: 100px;
   }
 }
+@keyframes fadeIn {
+  0%, 75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
-body .AppHeader {
+.AppHeader {
+  position: relative;
   background-color: rgb(255, 89, 55);
   text-align: center;
 
@@ -41,6 +57,23 @@ body .AppHeader {
   justify-content: center;
   height: 100px;
 }
+.App.tutorial .nav {
+  opacity: 0;
+}
+.nav {
+  text-align: center;
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  transition: opacity 1s;
+}
+.nav button {
+  display: inline-block;
+}
+.nav button.help {
+  float: right;
+}
+
 /* onload animation */
 body.animate .AppHeader {
   height: 100%;
@@ -49,12 +82,12 @@ body.animate .AppHeader {
 
 header .logo {
   padding: 20px;
-  max-height: 100%;
 }
 
 /* Content */
 
 .content {
+  position: relative;
   margin: 20px auto;
   width: 600px;
 }
@@ -88,6 +121,7 @@ header .logo {
   border-radius: 3px;
   background-color: rgb(255, 89, 55);
   line-height: 1.3;
+  cursor: pointer;
 }
 .content input[type="submit"]:hover {
   background-color: rgb(255, 129, 95);
@@ -106,6 +140,26 @@ header .logo {
 }
 
 /* section */
+.fade-wrapper {
+  transition:
+      opacity 1s,
+      -webkit-filter 1s,
+      -moz-filter 1s,
+      -o-filter 1s,
+      -ms-filter 1s,
+      filter 1s;
+}
+.fade-wrapper.not-current-tutorial {
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  filter: blur(5px);
+  opacity: 0.2;
+}
+.section {
+  position: relative;
+}
 .section:not(:last-of-type) {
   padding-bottom: 20px;
 }
@@ -127,7 +181,8 @@ header .logo {
 }
 
 /* GeneratedMusicSection */
-.GeneratedMusicSection .song-list {
+.GeneratedMusicSection .title {
+  padding: 20px;
 }
 .GeneratedMusicSection .song {
   font-size: 0;
@@ -239,11 +294,29 @@ header .logo {
   color: #fff;
 }
 
-/* upload */
-
-.upload .form {
+/* UploadingSection */
+.UploadingSection .form {
   text-align: center;
 }
-.upload .button {
+.UploadingSection .button {
   display: inline-block;
+}
+
+/* TutorialSection */
+.TutorialSection {
+  position: relative;
+}
+.TutorialSection .nextButton {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  z-index: 100;
+  height: 40px;
+  margin-top: -20px;
+  margin-right: 20px;
+  white-space: nowrap;
+  transition: opacity 500ms;
+}
+.TutorialSection .nextButton.invisible {
+  opacity: 0;
 }
