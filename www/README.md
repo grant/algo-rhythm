@@ -16,6 +16,7 @@ These are the tools you'll need to develop on this repo.
 - [Babel](https://babeljs.io/docs/learn-es2015/) - Better JS syntax
 - [Webpack](https://webpack.github.io/) - Bundles files into one bundle.js file
 - [npm](https://www.npmjs.com/) - Some external libraries
+- [MIDI.js](http://www.midijs.net/) - Midi player
 - Plain CSS (for now)
 
 ### Architecture

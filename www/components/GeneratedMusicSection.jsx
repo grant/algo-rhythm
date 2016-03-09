@@ -55,9 +55,12 @@ export default class GeneratedMusicSection extends React.Component {
     let newPlayingSong;
     if (this.state.playingSong === songName) {
       // Stop song
+      MIDIjs.stop();
       newPlayingSong = null;
     } else {
       // Play song
+      let file = `static/generated_music/${songName}`;
+      MIDIjs.play(file);
       newPlayingSong = songName;
     }
     this.setState({playingSong: newPlayingSong});
