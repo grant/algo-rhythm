@@ -44,6 +44,7 @@ body.animate .AppHeader {
 
 header .logo {
   padding: 20px;
+  height: 100%;
 }
 
 .github-fork {
