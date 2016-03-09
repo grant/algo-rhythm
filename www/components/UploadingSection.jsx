@@ -7,7 +7,7 @@ export default class UploadingSection extends React.Component {
     };
 
     return (
-      <section className="UploadingSection section group uploading">
+      <section className="UploadingSection section group">
         <section className="section upload">
           <h1 className="title">Upload MusicXML</h1>
           <form ref="form" action="/upload" method="post" encType="multipart/form-data" className="form">

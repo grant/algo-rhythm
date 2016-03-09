@@ -46,7 +46,7 @@ export default class TrainConfig extends React.Component {
       socket.emit('train', valObject);
     }
     return (
-      <section className="TrainConfig section train-config">
+      <section className="TrainConfig section">
         <h1 className="title">Train Configuration</h1>
         <form
           onSubmit={onSubmit}

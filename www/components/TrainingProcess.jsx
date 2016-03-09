@@ -11,7 +11,7 @@ export default class TrainingProcess extends React.Component {
   render() {
     let training_configs = this.props.training_configs;
     return (
-      <section className="TrainingProcess section training-configs">
+      <section className="TrainingProcess section">
         <h1 className="title">Configs Being Generated</h1>
         <ul>
           {training_configs.length ? (

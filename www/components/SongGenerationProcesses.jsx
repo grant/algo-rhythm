@@ -11,7 +11,7 @@ export default class SongGenerationProcesses extends React.Component {
   render() {
     let generating_songs = this.props.generating_songs;
     return (
-      <section className='SongGenerationProcesses section song-generation-processes'>
+      <section className='SongGenerationProcesses section'>
         <h1 className='title'>Songs Being Generated</h1>
         <ul>
           {generating_songs.length ? (

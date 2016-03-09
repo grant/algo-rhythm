@@ -66,9 +66,7 @@ export default class App extends React.Component {
       training_configs,
     } = this.state.status;
 
-    let loadStyles = {
-      overflow: this.state.loading ? 'hidden' : 'inherit'
-    };
+    let loadStyles = this.state.loading ? { overflow: 'hidden' } : {};
 
     return (
       <div className='App' style={loadStyles}>

@@ -41,7 +41,7 @@ export default class GenerateMusic extends React.Component {
       socket.emit('generate', valObject);
     }
     return (
-      <section className="GenerateMusic section generate-music">
+      <section className="GenerateMusic section">
         <form
           onSubmit={onSubmit}
           action="/generate"

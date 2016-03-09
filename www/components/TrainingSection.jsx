@@ -12,7 +12,7 @@ export default class TrainingSection extends React.Component {
 
   render() {
     return (
-      <section className="TrainingSection section group training" name="training">
+      <section className="TrainingSection section group" name="training">
         <TrainingProcess
           training_configs={this.props.training_configs} />
         <TrainConfig

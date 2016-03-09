@@ -6,6 +6,7 @@ html, body, #app, .App {
 
 html body {
   font-family: 'Open Sans', sans-serif;
+  overflow: hidden;
 }
 
 a {
@@ -15,6 +16,10 @@ a {
 
 input[type='radio'], input[type='checkbox'] {
   margin-right: 10px;
+}
+
+.App {
+  overflow-y: scroll;
 }
 
 /* Header */
@@ -44,15 +49,7 @@ body.animate .AppHeader {
 
 header .logo {
   padding: 20px;
-  height: 100%;
-}
-
-.github-fork {
-  position: absolute;
-  top: 0;
-  right: 0;
-  border: 0;
-  width: 100px;
+  max-height: 100%;
 }
 
 /* Content */
@@ -115,101 +112,104 @@ header .logo {
 
 .group {
   overflow: hidden;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #222;
+}
+.group:not(.GeneratedMusicSection) {
   padding: 20px;
   margin: 20px 0;
   border: 1px dotted #aaa;
-  border-radius: 5px;
-  color: #222;
   transition: background-color 200ms;
 }
-.group:hover {
+.group:not(.GeneratedMusicSection):hover {
   background-color: #efefef;
 }
 
-/* generated-music */
-.generated-music {
+/* GeneratedMusicSection */
+.GeneratedMusicSection .song-list {
 }
-.generated-music .song {
+.GeneratedMusicSection .song {
   font-size: 0;
   background-color: #fff;
 }
-.generated-music .song {
+.GeneratedMusicSection .song {
   width: 100%;
   padding: 10px 0;
   cursor: pointer;
 }
-.generated-music .song .icon {
+.GeneratedMusicSection .song .icon {
   position: relative;
   vertical-align: top;
 }
-.generated-music .song .icon .stop {
+.GeneratedMusicSection .song .icon .stop {
   font-size: 36px;
   margin-top: -13px;
 }
-.generated-music .song .icon .play {
+.GeneratedMusicSection .song .icon .play {
   font-size: 20px;
   margin-top: -4px;
 }
-.generated-music .song .icon .play, .generated-music .song .icon .stop {
+.GeneratedMusicSection .song .icon .play, .GeneratedMusicSection .song .icon .stop {
   text-align: center;
   display: none;
   position: absolute;
   width: 100%;
 }
-.generated-music .song.playing {
+.GeneratedMusicSection .song.playing {
   /* Currently playing song */
   background-color: rgb(255, 89, 55);
 }
-.generated-music .song:not(.playing):hover .icon .play {
+.GeneratedMusicSection .song:not(.playing):hover .icon .play {
   /* Play a song */
   display: block;
 }
-.generated-music .song.playing .icon .stop {
+.GeneratedMusicSection .song.playing .icon .stop {
   /* Stop playing song */
   display: block;
 }
-.generated-music .song:not(:first-child):not(.playing):hover {
+.GeneratedMusicSection .song:not(:first-child):not(.playing):hover {
   background-color: rgb(255, 209, 185);
 }
-.generated-music .song:not(:last-of-type) {
+.GeneratedMusicSection .song:not(:last-of-type) {
   border-bottom: 1px solid #eee;
 }
-.generated-music .song:nth-child(2n):not(.playing) {
+.GeneratedMusicSection .song:nth-child(2n):not(.playing) {
   background-color: #eee;
 }
-.generated-music .song.header {
+.GeneratedMusicSection .song.header {
   text-transform: uppercase;
   font-weight: 700;
   color: #aaa;
 }
-.generated-music .cell{
+.GeneratedMusicSection .cell{
   display: inline-block;
   margin: 0;
   padding: 0;
   font-size: 14px;
 }
-.generated-music .icon {
+.GeneratedMusicSection .icon {
   width: 10%;
 }
-.generated-music .name {
+.GeneratedMusicSection .name {
   width: 60%;
 }
-.generated-music .length {
+.GeneratedMusicSection .length {
   width: 30%;
 }
 
-/* song-generation-processes */
-/* training-configs */
-.song-generation-processes .song, .training-configs .config {
+/* SongGenerationProcesses */
+/* TrainingProcess */
+.SongGenerationProcesses .song, .TrainingProcess .config {
   margin: 10px 0;
 }
 
-.generate-music input[type='submit'], .train-config input[type='submit'] {
+.GenerateMusic input[type='submit'], .TrainConfig input[type='submit'] {
   margin: 0 10px;
 }
 
-/* progress-bar */
-.progress-bar {
+/* ProgressBar */
+.ProgressBar {
   width: 100%;
   height: 20px;
   border-radius: 10px;
@@ -219,19 +219,19 @@ header .logo {
   position: relative;
   border: 1px solid #aaa;
 }
-.progress-bar .name, .progress-bar .bar {
+.ProgressBar .name, .ProgressBar .bar {
   position: absolute;
   text-shadow: 0px 0px 3px rgba(0,0,0,0.5);
   top: 0;
   left: 0;
   width: 100%;
 }
-.progress-bar .bar {
+.ProgressBar .bar {
   background-color: rgb(255, 89, 55);
   height: 100%;
   z-index: 100;
 }
-.progress-bar .name {
+.ProgressBar .name {
   z-index: 200;
   font-size: 12px;
   font-weight: 100;
