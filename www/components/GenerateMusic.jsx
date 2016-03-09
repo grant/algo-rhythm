@@ -62,6 +62,7 @@ export default class GenerateMusic extends React.Component {
                         name="config"
                         checked={this.state.config === tc}
                         onChange={this.onRadioChange.bind(this, tc)}
+                        required={true}
                         value={tc} />
                       {tc}
                     </label>

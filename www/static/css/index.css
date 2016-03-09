@@ -4,17 +4,8 @@ html, body, #app, .App {
   height: 100%;
 }
 
-@keyframes unhide {
-  0% {
-    overflow: hidden;
-  }
-  50% {
-    overflow: none;
-  }
-}
 html body {
   font-family: 'Open Sans', sans-serif;
-  animation: unhide 2s normal forwards ease-in-out;
 }
 
 a {
@@ -76,14 +67,15 @@ header .logo {
   text-transform: uppercase;
   font-weight: 100;
   padding-bottom: 10px;
-  color: #ccc;
+  font-weight: 600;
+  color: #aaa;
 }
 .content .subtitle {
   font-size: 16px;
   text-transform: uppercase;
   font-weight: 100;
   padding: 8px 0;
-  color: #ccc;
+  color: #aaa;
 }
 
 .content input, .content label {
@@ -112,7 +104,7 @@ header .logo {
 
 .none {
   font-style: italic;
-  color: #ccc;
+  color: #aaa;
 }
 
 /* section */
@@ -124,7 +116,13 @@ header .logo {
   overflow: hidden;
   padding: 20px;
   margin: 20px 0;
-  border: 1px solid #eee;
+  border: 1px dotted #aaa;
+  border-radius: 5px;
+  color: #222;
+  transition: background-color 200ms;
+}
+.group:hover {
+  background-color: #efefef;
 }
 
 /* generated-music */
@@ -181,7 +179,7 @@ header .logo {
 .generated-music .song.header {
   text-transform: uppercase;
   font-weight: 700;
-  color: #ccc;
+  color: #aaa;
 }
 .generated-music .cell{
   display: inline-block;
@@ -214,10 +212,11 @@ header .logo {
   width: 100%;
   height: 20px;
   border-radius: 10px;
-  background-color: rgb(200,200,200);
+  margin: 5px 0;
+  background-color: #aaa;
   overflow: hidden;
   position: relative;
-  border: 1px solid #ddd;
+  border: 1px solid #aaa;
 }
 .progress-bar .name, .progress-bar .bar {
   position: absolute;

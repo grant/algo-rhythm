@@ -14,12 +14,6 @@ import {Notification, NotificationStack} from 'react-notification';
 
 
 $(document).ready(function(){
-  // Always be scrolled to the top on page load
-  // TODO Doesn't work
-  setTimeout(function() {
-    $(this).scrollTop(0);
-  }, 0);
-
   // Remove query parameters
   history.replaceState(null, "", location.href.split("?")[0]);
 });
@@ -38,6 +32,7 @@ export default class App extends React.Component {
       },
       notifications: OrderedSet(),
       notificationCount: 0,
+      loading: true,
     };
 
     // Setup websockets
@@ -51,6 +46,17 @@ export default class App extends React.Component {
     });
   }
 
+  componentDidMount() {
+    if (this.state.loading) {
+      // Always be scrolled to the top on page load
+      setTimeout(() => {
+        this.setState({
+          loading: false,
+        });
+      }, 1000);
+    }
+  }
+
   render() {
     let {
       generated_songs,
@@ -60,8 +66,12 @@ export default class App extends React.Component {
       training_configs,
     } = this.state.status;
 
+    let loadStyles = {
+      overflow: this.state.loading ? 'hidden' : 'inherit'
+    };
+
     return (
-      <div className='App'>
+      <div className='App' style={loadStyles}>
         <NotificationStack
           notifications={this.state.notifications.toArray()}
           onDismiss={notification => this.setState({
