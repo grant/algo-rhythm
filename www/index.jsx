@@ -116,21 +116,21 @@ export default class App extends React.Component {
         <AppHeader />
         <div className="content">
           <nav className='nav'>
-            <button onClick={this::startTutorial} className='button help'>Help</button>
+            <button onClick={this.startTutorial.bind(this)} className='button help'>Help</button>
           </nav>
           <TutorialSection
             buttonName={'Play your Music!'}
-            onButtonClick={this::onTutorialButtonClick}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
             sectionName={'GeneratedMusicSection'}
             tutorialSection={this.state.tutorialSection}>
             <GeneratedMusicSection
-              onButtonClick={this::onTutorialButtonClick}
+              onButtonClick={this.onTutorialButtonClick.bind(this)}
               tutorialSection={this.state.tutorialSection}
               generated_songs={generated_songs} />
           </TutorialSection>
           <TutorialSection
             buttonName={'Generate a Song'}
-            onButtonClick={this::onTutorialButtonClick}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
             sectionName={'SongGenerationSection'}
             tutorialSection={this.state.tutorialSection}>
             <SongGenerationSection
@@ -139,18 +139,18 @@ export default class App extends React.Component {
           </TutorialSection>
           <TutorialSection
             buttonName={'Choose Songs for a New Config'}
-            onButtonClick={this::onTutorialButtonClick}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
             sectionName={'TrainingSection'}
             tutorialSection={this.state.tutorialSection}>
             <TrainingSection
-              onButtonClick={this::onTutorialButtonClick}
+              onButtonClick={this.onTutorialButtonClick.bind(this)}
               tutorialSection={this.state.tutorialSection}
               training_configs={training_configs}
               music_files={music_files} />
           </TutorialSection>
           <TutorialSection
             buttonName={'Upload a MusicXML file'}
-            onButtonClick={this::onTutorialButtonClick}
+            onButtonClick={this.onTutorialButtonClick.bind(this)}
             sectionName={'UploadingSection'}
             tutorialSection={this.state.tutorialSection}>
             <UploadingSection />
