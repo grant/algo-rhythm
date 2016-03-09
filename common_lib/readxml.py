@@ -478,7 +478,10 @@ def stateMatrixForSong(tree):
 #prints output on error conditions because this is
 #currently always the right thing to do
 def getStatematrixOffsetPairForXmlFile(filename, minslices = 0):
-  tree = xml.etree.ElementTree.parse(filename).getroot()
+  try:
+    tree = xml.etree.ElementTree.parse(filename).getroot()
+  except Exception as e:
+    print "BAD XML PARSE", e
   if getTempoForSong(tree) == None:
     print "File {} has no tempo!!!".format(filename)
     return None
@@ -486,7 +489,7 @@ def getStatematrixOffsetPairForXmlFile(filename, minslices = 0):
     sm = stateMatrixForSong(tree)
     songMatrix = sm[1]
     if len(songMatrix) < minslices:
-      print "File {} omitted, it is too short.".format(theFile)
+      print "File {} omitted, it is too short.".format(filename)
       return None
     else:
       return sm

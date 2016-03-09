@@ -82,7 +82,7 @@ export default class TrainConfig extends React.Component {
             name="iterations"
             required="true"
             min="1"
-            max="9999"
+            max="99999"
             value={this.state.iterations}
             onChange={::this.onIterationsChange}
           />
