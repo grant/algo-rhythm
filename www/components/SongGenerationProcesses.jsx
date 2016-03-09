@@ -17,7 +17,7 @@ export default class SongGenerationProcesses extends React.Component {
           {generating_songs.length ? (
             generating_songs.map(song => {
               return (
-                <li key={song.name} className={'song ' + (this.state.playingSong === song.name ? 'playing' : '')}>
+                <li key={song.name}>
                   <ProgressBar name={song.name} progress={song.progress} />
                 </li>
               );
