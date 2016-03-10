@@ -9,9 +9,10 @@ export default class ProgressBar extends React.Component {
   }
 
   render() {
+    let progressBarName = this.props.name + ` (${this.props.progress}%)`;
     return (
-      <div className="ProgressBar progress-bar">
-        <div className="name">{this.props.name}</div>
+      <div className="ProgressBar">
+        <div className="name">{progressBarName}</div>
         <div className="bar" style={{width: this.props.progress + '%'}}></div>
       </div>
     );

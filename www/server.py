@@ -15,7 +15,7 @@ from werkzeug.utils import secure_filename
 BACKEND_BASE = '../blog-code'
 UPLOAD_DIR = BACKEND_BASE + '/training_xml_web/'
 CONFIG_DIR = BACKEND_BASE + '/trained_configs/'
-GENERATED_SONG_DIR = BACKEND_BASE + '/generated_music/'
+GENERATED_SONG_DIR = './static/generated_music/'
 SCRIPT_ROOT = BACKEND_BASE
 
 backend = back.Backend(UPLOAD_DIR, CONFIG_DIR, GENERATED_SONG_DIR, SCRIPT_ROOT)
@@ -36,8 +36,8 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 if not os.path.exists(CONFIG_FOLDER):
     os.makedirs(CONFIG_FOLDER)
-if not os.path.exists(GENERATED_SONG_FOLDER):
-    os.makedirs(GENERATED_SONG_FOLDER)
+# if not os.path.exists(GENERATED_SONG_FOLDER):
+#     os.makedirs(GENERATED_SONG_FOLDER)
 
 # Internally, backend can deliver process
 # events on multiple threads (with the
@@ -167,6 +167,7 @@ def start_generation(config_file, length, name):
         progressChangeHandler=handleProgressChange,
         terminationHandler=handleTermination
     )
+    broadcast_status()
 
 
 def start_training(files, name, iterations):
@@ -203,6 +204,7 @@ def start_training(files, name, iterations):
         progressChangeHandler=handleProgressChange,
         terminationHandler=handleTermination
     )
+    broadcast_status()
 
 
 def broadcast_status():

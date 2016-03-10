@@ -17,7 +17,7 @@ export default class GeneratedMusicSection extends React.Component {
   render() {
     let generated_songs = this.props.generated_songs;
     return (
-      <section className='section generated-music'>
+      <section className='GeneratedMusicSection group section'>
         <h1 className='title'>Generated Songs</h1>
         {!generated_songs.length ? (
           <div className='song none'>No songs have been generated yet.</div>
@@ -55,9 +55,12 @@ export default class GeneratedMusicSection extends React.Component {
     let newPlayingSong;
     if (this.state.playingSong === songName) {
       // Stop song
+      MIDIjs.stop();
       newPlayingSong = null;
     } else {
       // Play song
+      let file = `static/generated_music/${songName}`;
+      MIDIjs.play(file);
       newPlayingSong = songName;
     }
     this.setState({playingSong: newPlayingSong});

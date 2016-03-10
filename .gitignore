@@ -7,6 +7,9 @@ www/backend/music_uploads/
 www/backend/static/build/
 dummycode/trained_configs/
 dummycode/generated_music/
+blog-code/trained_configs/
+blog-code/generated_music/
+www/static/generated_music/
 
 .DS_Store
 .idea

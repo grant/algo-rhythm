@@ -4,17 +4,9 @@ html, body, #app, .App {
   height: 100%;
 }
 
-@keyframes unhide {
-  0% {
-    overflow: hidden;
-  }
-  50% {
-    overflow: none;
-  }
-}
 html body {
   font-family: 'Open Sans', sans-serif;
-  animation: unhide 2s normal forwards ease-in-out;
+  overflow: hidden;
 }
 
 a {
@@ -26,6 +18,17 @@ input[type='radio'], input[type='checkbox'] {
   margin-right: 10px;
 }
 
+.App {
+  overflow-y: scroll;
+  transition: background-color 1s;
+}
+.App.loading {
+  overflow: hidden;
+}
+.App.tutorial {
+  background-color: #222;
+}
+
 /* Header */
 @keyframes moveUp {
   50% {
@@ -35,8 +38,17 @@ input[type='radio'], input[type='checkbox'] {
     height: 100px;
   }
 }
+@keyframes fadeIn {
+  0%, 75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
-body .AppHeader {
+.AppHeader {
+  position: relative;
   background-color: rgb(255, 89, 55);
   text-align: center;
 
@@ -45,6 +57,23 @@ body .AppHeader {
   justify-content: center;
   height: 100px;
 }
+.App.tutorial .nav {
+  opacity: 0;
+}
+.nav {
+  text-align: center;
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  transition: opacity 1s;
+}
+.nav button {
+  display: inline-block;
+}
+.nav button.help {
+  float: right;
+}
+
 /* onload animation */
 body.animate .AppHeader {
   height: 100%;
@@ -55,17 +84,10 @@ header .logo {
   padding: 20px;
 }
 
-.github-fork {
-  position: absolute;
-  top: 0;
-  right: 0;
-  border: 0;
-  width: 100px;
-}
-
 /* Content */
 
 .content {
+  position: relative;
   margin: 20px auto;
   width: 600px;
 }
@@ -76,14 +98,15 @@ header .logo {
   text-transform: uppercase;
   font-weight: 100;
   padding-bottom: 10px;
-  color: #ccc;
+  font-weight: 600;
+  color: #aaa;
 }
 .content .subtitle {
   font-size: 16px;
   text-transform: uppercase;
   font-weight: 100;
   padding: 8px 0;
-  color: #ccc;
+  color: #aaa;
 }
 
 .content input, .content label {
@@ -98,6 +121,7 @@ header .logo {
   border-radius: 3px;
   background-color: rgb(255, 89, 55);
   line-height: 1.3;
+  cursor: pointer;
 }
 .content input[type="submit"]:hover {
   background-color: rgb(255, 129, 95);
@@ -112,125 +136,157 @@ header .logo {
 
 .none {
   font-style: italic;
-  color: #ccc;
+  color: #aaa;
 }
 
 /* section */
+.fade-wrapper {
+  transition:
+      opacity 1s,
+      -webkit-filter 1s,
+      -moz-filter 1s,
+      -o-filter 1s,
+      -ms-filter 1s,
+      filter 1s;
+}
+.fade-wrapper.not-current-tutorial {
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  filter: blur(5px);
+  opacity: 0.2;
+}
+.section {
+  position: relative;
+}
 .section:not(:last-of-type) {
   padding-bottom: 20px;
 }
 
 .group {
   overflow: hidden;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #222;
+}
+.group:not(.GeneratedMusicSection) {
   padding: 20px;
   margin: 20px 0;
-  border: 1px solid #eee;
+  border: 1px dotted #aaa;
+  transition: background-color 200ms;
+}
+.group:not(.GeneratedMusicSection):hover {
+  background-color: #efefef;
 }
 
-/* generated-music */
-.generated-music {
+/* GeneratedMusicSection */
+.GeneratedMusicSection .title {
+  padding: 20px;
 }
-.generated-music .song {
+.GeneratedMusicSection .song {
   font-size: 0;
   background-color: #fff;
 }
-.generated-music .song {
+.GeneratedMusicSection .song {
   width: 100%;
   padding: 10px 0;
   cursor: pointer;
 }
-.generated-music .song .icon {
+.GeneratedMusicSection .song .icon {
   position: relative;
   vertical-align: top;
 }
-.generated-music .song .icon .stop {
+.GeneratedMusicSection .song .icon .stop {
   font-size: 36px;
   margin-top: -13px;
 }
-.generated-music .song .icon .play {
+.GeneratedMusicSection .song .icon .play {
   font-size: 20px;
   margin-top: -4px;
 }
-.generated-music .song .icon .play, .generated-music .song .icon .stop {
+.GeneratedMusicSection .song .icon .play, .GeneratedMusicSection .song .icon .stop {
   text-align: center;
   display: none;
   position: absolute;
   width: 100%;
 }
-.generated-music .song.playing {
+.GeneratedMusicSection .song.playing {
   /* Currently playing song */
   background-color: rgb(255, 89, 55);
 }
-.generated-music .song:not(.playing):hover .icon .play {
+.GeneratedMusicSection .song:not(.playing):hover .icon .play {
   /* Play a song */
   display: block;
 }
-.generated-music .song.playing .icon .stop {
+.GeneratedMusicSection .song.playing .icon .stop {
   /* Stop playing song */
   display: block;
 }
-.generated-music .song:not(:first-child):not(.playing):hover {
+.GeneratedMusicSection .song:not(:first-child):not(.playing):hover {
   background-color: rgb(255, 209, 185);
 }
-.generated-music .song:not(:last-of-type) {
+.GeneratedMusicSection .song:not(:last-of-type) {
   border-bottom: 1px solid #eee;
 }
-.generated-music .song:nth-child(2n):not(.playing) {
+.GeneratedMusicSection .song:nth-child(2n):not(.playing) {
   background-color: #eee;
 }
-.generated-music .song.header {
+.GeneratedMusicSection .song.header {
   text-transform: uppercase;
   font-weight: 700;
-  color: #ccc;
+  color: #aaa;
 }
-.generated-music .cell{
+.GeneratedMusicSection .cell{
   display: inline-block;
   margin: 0;
   padding: 0;
   font-size: 14px;
 }
-.generated-music .icon {
+.GeneratedMusicSection .icon {
   width: 10%;
 }
-.generated-music .name {
+.GeneratedMusicSection .name {
   width: 60%;
 }
-.generated-music .length {
+.GeneratedMusicSection .length {
   width: 30%;
 }
 
-/* song-generation-processes */
-/* training-configs */
-.song-generation-processes .song, .training-configs .config {
+/* SongGenerationProcesses */
+/* TrainingProcess */
+.SongGenerationProcesses .song, .TrainingProcess .config {
   margin: 10px 0;
 }
 
-.generate-music input[type='submit'], .train-config input[type='submit'] {
+.GenerateMusic input[type='submit'], .TrainConfig input[type='submit'] {
   margin: 0 10px;
 }
 
-/* progress-bar */
-.progress-bar {
+/* ProgressBar */
+.ProgressBar {
   width: 100%;
   height: 20px;
   border-radius: 10px;
+  margin: 5px 0;
+  background-color: #aaa;
   overflow: hidden;
   position: relative;
-  border: 1px solid #ddd;
+  border: 1px solid #aaa;
 }
-.progress-bar .name, .progress-bar .bar {
+.ProgressBar .name, .ProgressBar .bar {
   position: absolute;
-  text-shadow: 0px 0px 3px rgba(0,0,0,.3);
+  text-shadow: 0px 0px 3px rgba(0,0,0,0.5);
   top: 0;
   left: 0;
   width: 100%;
 }
-.progress-bar .bar {
+.ProgressBar .bar {
   background-color: rgb(255, 89, 55);
   height: 100%;
   z-index: 100;
 }
-.progress-bar .name {
+.ProgressBar .name {
   z-index: 200;
   font-size: 12px;
   font-weight: 100;
@@ -238,11 +294,29 @@ header .logo {
   color: #fff;
 }
 
-/* upload */
-
-.upload .form {
+/* UploadingSection */
+.UploadingSection .form {
   text-align: center;
 }
-.upload .button {
+.UploadingSection .button {
   display: inline-block;
+}
+
+/* TutorialSection */
+.TutorialSection {
+  position: relative;
+}
+.TutorialSection .nextButton {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  z-index: 100;
+  height: 40px;
+  margin-top: -20px;
+  margin-right: 20px;
+  white-space: nowrap;
+  transition: opacity 500ms;
+}
+.TutorialSection .nextButton.invisible {
+  opacity: 0;
 }

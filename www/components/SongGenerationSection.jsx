@@ -12,7 +12,7 @@ export default class SongGenerationSection extends React.Component {
 
   render() {
     return (
-      <section className="SongGenerationSection section group song-generation" name="generating">
+      <section className="SongGenerationSection section group" name="generating">
         <SongGenerationProcesses
           generating_songs={this.props.generating_songs} />
         <GenerateMusic

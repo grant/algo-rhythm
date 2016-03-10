@@ -46,7 +46,7 @@ export default class TrainConfig extends React.Component {
       socket.emit('train', valObject);
     }
     return (
-      <section className="TrainConfig section train-config">
+      <section className="TrainConfig section">
         <h1 className="title">Train Configuration</h1>
         <form
           onSubmit={onSubmit}
@@ -82,7 +82,7 @@ export default class TrainConfig extends React.Component {
             name="iterations"
             required="true"
             min="1"
-            max="9999"
+            max="99999"
             value={this.state.iterations}
             onChange={::this.onIterationsChange}
           />
