@@ -33,7 +33,7 @@ Basically, the site flow works like this:
 Open two terminal windows:
 
 1. Run server
-2. Run clint build
+2. Run client build
 
 While developing, check both terminals for errors.
 
