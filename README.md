@@ -2,7 +2,14 @@
 
 Algorithmic Music Composition with Artificial Neural Nets
 
-See the [project overview](https://docs.google.com/document/d/1C1j9c8HHGg_dk06ioMi8d7d4vOIaILWbKF0PoOqM7ks/edit?usp=sharing).
+![Algo Rhythm Logo](https://cloud.githubusercontent.com/assets/744973/13688861/730e965e-e6d9-11e5-9dc4-40cf089e96e2.png)
+
+See the [project overview](https://docs.google.com/document/d/1C1j9c8HHGg_dk06ioMi8d7d4vOIaILWbKF0PoOqM7ks/edit?usp=sharing) for details about the project.
+
+## Screenshots
+
+![Top Half](https://cloud.githubusercontent.com/assets/744973/13688838/50826a5c-e6d9-11e5-972a-a047bb85434c.png)
+![Bottom Half](https://cloud.githubusercontent.com/assets/744973/13688692/4653a704-e6d8-11e5-883f-47cdca2380f1.png)
 
 ### How to install
 
