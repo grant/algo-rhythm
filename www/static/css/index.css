@@ -82,6 +82,7 @@ body.animate .AppHeader {
 
 header .logo {
   padding: 20px;
+  height: 100%;
 }
 
 /* Content */
@@ -285,6 +286,7 @@ header .logo {
   background-color: rgb(255, 89, 55);
   height: 100%;
   z-index: 100;
+  border-radius: 10px;
 }
 .ProgressBar .name {
   z-index: 200;
