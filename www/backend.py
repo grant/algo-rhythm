@@ -13,20 +13,28 @@ def start_process(cmd, stdouthandler, deathhandler):
         run, and the remaining strings being the arguments to pass to the program
         """
 
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
         def block_on_output(out):
             for line in iter(out.readline, b''):
                 print line
                 stdouthandler(line)
+
+            processAlive = (process.poll() is None)
+            if processAlive:
+              print "Got eof from stdout, but process is still alive"
+            else:
+              print "Got eof, process is dead"
             deathhandler()
             out.close()
 
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         #queue = Queue()
         thread = Thread(target=block_on_output, args=(process.stdout,))
         thread.daemon = True  # thread dies with the program
         thread.start()
 
         #return process, queue
+        return process, thread
 
 
 class Process:
@@ -37,6 +45,8 @@ class Process:
   the process's execution
   """
   def __init__(self, cmd, progressChangeHandler=None, terminationHandler=None):
+
+    print cmd
 
     self.lines = []
     self.percentDone = 0
@@ -62,7 +72,7 @@ class Process:
       if terminationHandler != None:
         terminationHandler()
 
-    start_process(cmd, handleStdout, handleDeath)
+    self.p, self.t = start_process(cmd, handleStdout, handleDeath)
 
   #read the process output, update the
   #lines and percent done fields appropriately
@@ -123,24 +133,25 @@ class Backend:
         self.generating_songs = {}
 
     def __cleanup(self):
-        dead = set()
-        for pname in self.training_configs.keys():
-            proc = self.training_configs[pname]
-            proc.harvestProcessOut()
-            if proc.isDead:
-              dead.add(pname)
-        for pname in dead:
-            # delete dead processes from hashmap
-            del self.training_configs[pname]
-        dead = set()
-        for pname in self.generating_songs.keys():
-            proc = self.generating_songs[pname]
-            proc.harvestProcessOut()
-            if proc.isDead:
-              dead.add(pname)
-        for pname in dead:
-            # delete dead processes from hashmap
-            del self.generating_songs[pname]
+#        dead = set()
+#        for pname in self.training_configs.keys():
+#            proc = self.training_configs[pname]
+#            proc.harvestProcessOut()
+#            if proc.isDead:
+#              dead.add(pname)
+#        for pname in dead:
+#            # delete dead processes from hashmap
+#            del self.training_configs[pname]
+#        dead = set()
+#        for pname in self.generating_songs.keys():
+#            proc = self.generating_songs[pname]
+#            proc.harvestProcessOut()
+#            if proc.isDead:
+#              dead.add(pname)
+#        for pname in dead:
+#            # delete dead processes from hashmap
+#            del self.generating_songs[pname]
+      pass
 
     def start_training_process(self, config, files, iterations, progressChangeHandler=None, terminationHandler=None, start_config=None):
         """
@@ -278,8 +289,8 @@ if __name__ == '__main__':
       print "Generation done!"
 
     backend = Backend(UPLOAD_DIR, CONFIG_DIR, GENERATED_SONG_DIR, SCRIPT_ROOT)
-    backend.start_training_process("config", ["Marcia_Turca.xml", "bach_bouree_eminor.xml", "Mozart_Cadenza_2.0.xml"], 3, handleProgress, handleTerminationTraining)
-    #backend.start_music_generation_process('config', 'generated_out.mid', 100)
+    #backend.start_training_process("config", ["Marcia_Turca.xml", "bach_bouree_eminor.xml", "Mozart_Cadenza_2.0.xml"], 3, handleProgress, handleTerminationTraining)
+    backend.start_music_generation_process('params300.p', 'generated_out.mid', 60)
 
     #backend.start_music_generation_process('params300.p', 'myexamplesong.mid', 15, handleProgress, handleTerminationGeneration)
 

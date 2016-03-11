@@ -1,5 +1,6 @@
 import midi, numpy
 import xml.etree.ElementTree
+import sys
 
 lowerBound = 24
 upperBound = 102
@@ -63,6 +64,7 @@ def midiToNoteStateMatrix(midifile):
     return statematrix
 
 def noteStateMatrixToMidi(statematrix, name="example"):
+    print "Length received statematrix: {}".format(len(statematrix))
     statematrix = numpy.asarray(statematrix)
     pattern = midi.Pattern()
     track = midi.Track()
@@ -73,7 +75,11 @@ def noteStateMatrixToMidi(statematrix, name="example"):
     
     lastcmdtime = 0
     prevstate = [[0,0] for x in range(span)]
+    loopcount = 0
     for time, state in enumerate(statematrix + [prevstate[:]]):  
+#        print "loopcount = {}".format(loopcount)
+#        print "time = {}".format(time)
+        loopcount += 1
         offNotes = []
         onNotes = []
         for i in range(span):
@@ -88,16 +94,21 @@ def noteStateMatrixToMidi(statematrix, name="example"):
             elif n[0] == 1:
                 onNotes.append(i)
         for note in offNotes:
+#            print "Note off event"
             track.append(midi.NoteOffEvent(tick=(time-lastcmdtime)*tickscale, pitch=note+lowerBound))
             lastcmdtime = time
         for note in onNotes:
+#            print "Note on event"
             track.append(midi.NoteOnEvent(tick=(time-lastcmdtime)*tickscale, velocity=40, pitch=note+lowerBound))
             lastcmdtime = time
             
         prevstate = state
+#        sys.stdout.flush()
     
     eot = midi.EndOfTrackEvent(tick=1)
     track.append(eot)
+
+    print repr(pattern)
 
     midi.write_midifile("{}".format(name), pattern)
 

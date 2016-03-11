@@ -45,19 +45,24 @@ if __name__ == '__main__':
   firstSlice = []
   for i in range(0, pitchrange):
     pair = [0, 0]
-    #if random.randrange(10) > 7:
-    #  pair[0] = 1
-    #  if random.randrange(10) > 5:
-    #    pair[1] = 1
+    #70% chance note is played
+    if random.randrange(10) > 7:
+      pair[0] = 1
+      #50% chance note is "terminal", i.e.,
+      #not extended
+      if random.randrange(10) > 5:
+        pair[1] = 1
     firstSlice.append(pair)
   firstSlice = [firstSlice]
 
   xOpt = firstSlice
   xIpt = data.noteStateMatrixToInputForm(firstSlice)
 
+  print "Numseconds received: {}".format(numseconds)
+  sys.stdout.flush()
   slices_to_generate = 8 * numseconds
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
-
+  sys.stdout.flush()
 
   def outputPercentages():
     global percentDoneApprox
@@ -69,14 +74,23 @@ if __name__ == '__main__':
       print "PERCENT: {}".format(percentDoneApprox)
       sys.stdout.flush()
       lock.release()
+    print "Percent printing thread exiting"
+    sys.stdout.flush()
 
   t = Thread(target = outputPercentages)
   t.start()
 
-  noteStateMatrixToMidi(numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0), outfile)
+  print "Slices to generate: {}".format(slices_to_generate)
+  sys.stdout.flush()
+  outputStateMatrix = numpy.concatenate((numpy.expand_dims(xOpt[0], 0), mod.predict_fun(slices_to_generate, 1, xIpt[0])), axis=0)
+  
+  print "Num slices in output matrix: {}".format(len(outputStateMatrix))
+  sys.stdout.flush()
+  noteStateMatrixToMidi(outputStateMatrix, outfile)
 
   lock.acquire()
   print "{}: Done.".format(time.strftime("%c"))
+  sys.stdout.flush()
   lock.release()
   os._exit(0)
 
