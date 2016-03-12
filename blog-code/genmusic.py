@@ -68,7 +68,7 @@ if __name__ == '__main__':
     global percentDoneApprox
     global lock
     while percentDoneApprox != 100:
-      time.sleep(float(numseconds * 6)/100)
+      time.sleep(float(numseconds * 4)/100)
       percentDoneApprox += 1
       lock.acquire()
       print "PERCENT: {}".format(percentDoneApprox)
