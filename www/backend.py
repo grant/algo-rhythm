@@ -280,7 +280,7 @@ class Backend:
 
           generatedSongs.append({
             'name': song,
-            'length': '{}:{}'.format(lengthMinutes, lengthSeconds)
+            'length': '{0}:{1:02}'.format(lengthMinutes, lengthSeconds)
           })
 
         return {
