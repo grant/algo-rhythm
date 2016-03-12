@@ -78,11 +78,16 @@ if __name__ == '__main__':
           sys.stdout.flush()
 
         print "Starting training..."
+        sys.stdout.flush()
 	multi_training.trainPiece(m, pcs, numiterations, handleEpochStart)
+        sys.stdout.flush()
+
+        print "Finished training..."
+        sys.stdout.flush()
 
 	pickle.dump( m.learned_config, open( outfile, "wb" ))
 
-        for line in sys.stdin:
-          print line
+        #for line in sys.stdin:
+        #  print line
 
 
