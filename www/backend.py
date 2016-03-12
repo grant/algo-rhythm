@@ -1,6 +1,6 @@
 from threading import Thread
 import os, sys
-import subprocess
+import subprocess, midi
 from Queue import Queue, Empty
 
 
@@ -119,6 +119,18 @@ class Process:
 
   def getAllOutput(self):
     return '\n'.join(self.lines)
+
+
+def getLengthOfMidiSongInTicks(midifile):
+  pattern = midi.read_midifile(midifile)
+  greatestTick = 0
+  for track in pattern:
+    currTime = 0
+    for evnt in track:
+      currTime += evnt.tick
+    if currTime > greatestTick:
+      greatestTick = currTime
+  return greatestTick
 
 
 
@@ -257,9 +269,18 @@ class Backend:
           #music it should be 8*55 ticks per seconds, we can
           #also cache these in a hashmap for faster lookup,
           #but this isn't implemented yet
+
+          tickLength = getLengthOfMidiSongInTicks(self.generated_song_dir + song)
+          #For our generated music, it will always be 55 ticks per slice,
+          #and 8 slices per second, so we use these as assumptions
+          lengthSeconds = (tickLength / 55) / 8
+
+          lengthMinutes = int(lengthSeconds) / 60
+          lengthSeconds %= 60
+
           generatedSongs.append({
             'name': song,
-            'length': '3:02'
+            'length': '{}:{}'.format(lengthMinutes, lengthSeconds)
           })
 
         return {
