@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
   print "Numseconds received: {}".format(numseconds)
   sys.stdout.flush()
-  slices_to_generate = 8 * numsModeleconds
+  slices_to_generate = 8 * numseconds
   print "{}: Generating music to output/generated...".format(time.strftime("%c"))
   sys.stdout.flush()
 
