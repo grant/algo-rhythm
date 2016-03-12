@@ -145,25 +145,25 @@ class Backend:
         self.generating_songs = {}
 
     def __cleanup(self):
-#        dead = set()
-#        for pname in self.training_configs.keys():
-#            proc = self.training_configs[pname]
-#            proc.harvestProcessOut()
-#            if proc.isDead:
-#              dead.add(pname)
-#        for pname in dead:
-#            # delete dead processes from hashmap
-#            del self.training_configs[pname]
-#        dead = set()
-#        for pname in self.generating_songs.keys():
-#            proc = self.generating_songs[pname]
-#            proc.harvestProcessOut()
-#            if proc.isDead:
-#              dead.add(pname)
-#        for pname in dead:
-#            # delete dead processes from hashmap
-#            del self.generating_songs[pname]
-      pass
+        dead = set()
+        for pname in self.training_configs.keys():
+            proc = self.training_configs[pname]
+            proc.harvestProcessOut()
+            if proc.isDead:
+              dead.add(pname)
+        for pname in dead:
+            # delete dead processes from hashmap
+            del self.training_configs[pname]
+        dead = set()
+        for pname in self.generating_songs.keys():
+            proc = self.generating_songs[pname]
+            proc.harvestProcessOut()
+            if proc.isDead:
+              dead.add(pname)
+        for pname in dead:
+            # delete dead processes from hashmap
+            del self.generating_songs[pname]
+#      pass
 
     def start_training_process(self, config, files, iterations, progressChangeHandler=None, terminationHandler=None, start_config=None):
         """
