@@ -122,7 +122,10 @@ class Process:
 
 
 def getLengthOfMidiSongInTicks(midifile):
-  pattern = midi.read_midifile(midifile)
+  try:
+    pattern = midi.read_midifile(midifile)
+  except Exception as e:
+    return 0
   greatestTick = 0
   for track in pattern:
     currTime = 0

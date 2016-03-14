@@ -80,6 +80,11 @@ body.animate .AppHeader {
   animation: moveUp 2s normal forwards ease-in-out;
 }
 
+body.stillLogo .AppHeader {
+  height: 100%;
+  animation: moveUp 3464542s normal forwards ease-in-out;
+}
+
 header .logo {
   padding: 20px;
   height: 100%;

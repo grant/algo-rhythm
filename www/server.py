@@ -85,6 +85,18 @@ def home():
         generatedmusic=status['generated_songs']
     )
 
+@app.route('/logo')
+def logo():
+    status = backend.get_status()
+    return render_template(
+        'index.html',
+        animate='logo',
+        music_files=status['music_files'],
+        trainingconfigs=status['training_configs'],
+        trainedconfigs=status['trained_configs'],
+        generationprocesses=status['generating_songs'],
+        generatedmusic=status['generated_songs']
+    )
 
 # About
 @app.route('/about')
