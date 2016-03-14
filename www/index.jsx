@@ -66,7 +66,7 @@ export default class App extends React.Component {
       tutorialSection: 'UploadingSection',
     });
 
-    $('.App').animate({ scrollTop: $(document).height() }, "slow");
+    $('.App').animate({ scrollTop: $('.App .content').height() }, "slow");
   }
 
   onTutorialButtonClick(sectionName) {
@@ -80,8 +80,9 @@ export default class App extends React.Component {
       const nextTutorialSection = tutorialOrder[tutorialOrder.indexOf(sectionName) + 1] || null;
       // Scroll over to next section
       if (nextTutorialSection) {
+        let $closestTut = $('.' + nextTutorialSection).closest('.TutorialSection');
         $('.App').animate({
-          scrollTop: $('.' + nextTutorialSection).closest('.TutorialSection').position().top
+          scrollTop: $closestTut.position().top + ($closestTut.height() / 2)
         }, 1000);
       }
       this.setState({
