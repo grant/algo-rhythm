@@ -34,7 +34,7 @@ python-engineio==0.9.0
 python-midi==0.2.4
 python-openid==2.2.5
 python-socketio==1.1
-PyYAML==3.11
+PyYAML==5.4
 requests==2.9.1
 requests-oauthlib==0.6.0
 scipy==0.16.1
