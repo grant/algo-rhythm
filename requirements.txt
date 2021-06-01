@@ -46,6 +46,6 @@ theano-lstm==0.0.15
 tinys3==0.1.11
 urllib3==1.26.5
 virtualenv==14.0.6
-Werkzeug==0.11.4
+Werkzeug==0.15.3
 whitenoise==2.0.4
 xmltodict==0.9.2
