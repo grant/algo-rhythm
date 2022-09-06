@@ -15,7 +15,7 @@ django-widget-tweaks==1.4.1
 djangorestframework==3.11.2
 djdt-flamegraph==0.2.12
 elasticsearch==1.7.0
-Flask==0.10.1
+Flask==1.0
 Flask-SocketIO==2.2
 futures==3.0.4
 GDAL==1.11.3
