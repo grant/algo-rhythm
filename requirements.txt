@@ -1,7 +1,7 @@
 coverage==4.0.3
 diff-match-patch==20121119
 dj-database-url==0.3.0
-Django==1.8.6
+Django==2.2.28
 django-allauth==0.23.0
 django-countries==3.4.1
 django-debug-toolbar==1.11.1
